@@ -2,6 +2,39 @@ package main
 
 import "testing"
 
+func TestParseBoard(t *testing.T) {
+	b := ParseBoard(`
+x   
+ x  
+   x
+`)
+
+	test := []struct {
+		r, c int
+		want bool
+	}{
+		{0, 0, true},
+		{0, 1, false},
+		{0, 2, false},
+		{0, 3, false},
+		{1, 0, false},
+		{1, 1, true},
+		{1, 2, false},
+		{1, 3, false},
+		{2, 0, false},
+		{2, 1, false},
+		{2, 2, false},
+		{2, 3, true},
+	}
+
+	for _, c := range test {
+		if have := b.Get(c.r, c.c); have != c.want {
+			t.Errorf("%#v: got: %v", c, have)
+		}
+	}
+
+}
+
 func TestNeighbors(t *testing.T) {
 	b := MakeBoard(3, 4)
 	b.Set(0, 0, true)

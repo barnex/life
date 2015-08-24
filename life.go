@@ -1,7 +1,41 @@
 package main
 
+import (
+	"fmt"
+	"strings"
+)
+
 type Board struct {
 	cells [][]bool
+}
+
+func NextState(alive bool, neighbors int) bool {
+	if alive {
+		return neighbors == 2 || neighbors == 3
+	} else {
+		return neighbors == 3
+	}
+}
+
+func ParseBoard(str string) *Board {
+	str = strings.TrimLeft(str, "\n")
+	l := strings.Split(str, "\n")
+	cols := len(l[0])
+	rows := len(str) / (cols + 1)
+	if len(str)%(cols+1) != 0 {
+		panic("malformed board")
+	}
+	b := MakeBoard(rows, cols)
+	for r := range l {
+		if len(l) != cols {
+			panic(fmt.Sprintf("malformed board: row %v has length %v, want %v", r, len(l), cols))
+		}
+		for c := range l[r] {
+			v := l[r][c] != ' '
+			b.Set(r, c, v)
+		}
+	}
+	return b
 }
 
 func (b *Board) Neighbors(r, c int) int {
