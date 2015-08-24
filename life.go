@@ -4,6 +4,22 @@ type Board struct {
 	cells [][]bool
 }
 
+func (b *Board) Neighbors(r, c int) int {
+	count := 0
+	for rr := r - 1; rr <= r+1; rr++ {
+		for cc := c - 1; cc <= c+1; cc++ {
+			if b.Get(rr, cc) {
+				count++
+			}
+		}
+	}
+	// do not count self
+	if b.Get(r, c) {
+		count--
+	}
+	return count
+}
+
 func (b *Board) Set(r, c int, v bool) {
 	r, c = b.wrap(r, c)
 	b.cells[r][c] = v
