@@ -2,13 +2,40 @@ package main
 
 import "testing"
 
-func TestParseBoard(t *testing.T) {
+func TestAdvance(t *testing.T) {
 	b := ParseBoard(`
-x   
+      
+      
+ xxx  
+      
+      
+`)
+
+	b.Advance(1)
+
+	if Fmt(b) != `
+  x   
+  x   
+  x   
+      
+` {
+		t.Fail()
+	}
+
+}
+
+func TestParseBoard(t *testing.T) {
+	b := ParseBoard(`x   
  x  
    x
 `)
 
+	if b.Rows() != 3 {
+		t.Fail()
+	}
+	if b.Cols() != 4 {
+		t.Fail()
+	}
 	test := []struct {
 		r, c int
 		want bool
