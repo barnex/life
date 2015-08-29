@@ -3,7 +3,11 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"time"
+	"image"
+	"image/color"
+	"image/png"
+	"log"
+	"net/http"
 )
 
 func Fmt(b *Board) string {
@@ -94,11 +98,62 @@ func main() {
 			{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 		})
 
+	http.HandleFunc("/img", handleImg)
+
+	go func() {
+		err := http.ListenAndServe(":8080", nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	trash <- nil
+
 	for {
-		fmt.Println("\n\n\n\n\n\n\n\n\n\n\n\n")
-		fmt.Println(Fmt(b))
-		b.Advance(1)
-		time.Sleep(500 * time.Millisecond)
+		select {
+		default:
+			b.Advance(1)
+		case img := <-request:
+			rendered <- render(img, b)
+			b.Advance(1) // make sure we advance at lease one step per rendering
+		}
+	}
+}
+
+var (
+	trash    = make(chan *image.RGBA, 1)
+	request  = make(chan *image.RGBA)
+	rendered = make(chan *image.RGBA)
+)
+
+func handleImg(w http.ResponseWriter, r *http.Request) {
+	request <- <-trash
+	img := <-rendered
+	png.Encode(w, img)
+	trash <- img
+}
+
+var (
+	Alive = color.Black
+	Dead  = color.White
+)
+
+func render(img *image.RGBA, b *Board) *image.RGBA {
+	rows, cols := b.Rows(), b.Cols()
+	wantSize := image.Rect(0, 0, rows, cols)
+	if img == nil || img.Bounds() != wantSize {
+		img = image.NewRGBA(image.Rect(0, 0, rows, cols))
 	}
 
+	for r := 0; r < rows; r++ {
+		for c := 0; c < cols; c++ {
+			if b.Get(r, c) {
+				img.Set(r, c, Alive)
+			} else {
+				img.Set(r, c, Dead)
+			}
+		}
+	}
+
+	return img
 }
