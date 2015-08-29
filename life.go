@@ -99,6 +99,7 @@ func main() {
 		})
 
 	http.HandleFunc("/img", handleImg)
+	http.HandleFunc("/", handleRoot)
 
 	go func() {
 		err := http.ListenAndServe(":8080", nil)
@@ -125,6 +126,26 @@ var (
 	request  = make(chan *image.RGBA)
 	rendered = make(chan *image.RGBA)
 )
+
+const JS = `
+<html>
+<head>
+<script>
+setInterval(function() {
+    var el = document.getElementById('img');
+    el.src = '/img?rand=' + Math.random();
+}, 50);
+</script>
+</head>
+<body>
+	<img id="img" src="/img" />
+</body>
+</html>
+`
+
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, JS)
+}
 
 func handleImg(w http.ResponseWriter, r *http.Request) {
 	request <- <-trash
