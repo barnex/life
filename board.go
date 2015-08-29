@@ -1,54 +1,8 @@
 package main
 
-import (
-	"bytes"
-	"fmt"
-	"strings"
-)
-
-func Fmt(b *Board) string {
-	rows := b.Rows()
-	cols := b.Cols()
-	var buf bytes.Buffer
-	fmt.Fprintln(&buf)
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			v := b.Get(i, j)
-			if v {
-				fmt.Fprint(&buf, "x")
-			} else {
-				fmt.Fprint(&buf, " ")
-			}
-		}
-		fmt.Fprintln(&buf)
-	}
-	return buf.String()
-}
-
 type Board struct {
 	cells [][]bool
 	temp  [][]bool
-}
-
-func ParseBoard(str string) *Board {
-	lines := strings.Split(str, "\n")
-
-	rows := len(lines)
-	cols := 0
-	for _, l := range lines {
-		if len(l) > cols {
-			cols = len(l)
-		}
-	}
-
-	b := MakeBoard(rows, cols)
-	for r, l := range lines {
-		for c := range l {
-			v := l[c] == 'x'
-			b.Set(r, c, v)
-		}
-	}
-	return b
 }
 
 func (b *Board) Advance(steps int) {
