@@ -34,14 +34,23 @@ func (b *Board) Neighbors(r, c int) int {
 }
 
 func (b *Board) neighbors(r, c int) byte {
-	var count byte
-	for rr := r - 1; rr <= r+1; rr++ {
-		for cc := c - 1; cc <= c+1; cc++ {
-			count += b.get(rr, cc)
-		}
-	}
-	// do not count self
-	count -= b.get(r, c)
+	cL := c - 1
+	cR := c + 1
+
+	r--
+	count := b.get(r, cL)
+	count += b.get(r, c)
+	count += b.get(r, cR)
+
+	r++
+	count += b.get(r, cL)
+	count += b.get(r, cR)
+
+	r++
+	count += b.get(r, cL)
+	count += b.get(r, c)
+	count += b.get(r, cR)
+
 	return count
 }
 
