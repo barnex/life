@@ -48,29 +48,6 @@ func SetRand(b *Board, seed int64, fill float64) {
 	}
 }
 
-func NextState(alive bool, neighbors int) bool {
-	if alive {
-		return neighbors == 2 || neighbors == 3
-	} else {
-		return neighbors == 3
-	}
-}
-
-func makeMatrix(rows, cols int) [][]bool {
-	all := make([]bool, rows*cols)
-	c := make([][]bool, rows)
-	for i := range c {
-		c[i] = all[i*cols : (i+1)*cols]
-	}
-	return c
-}
-
-func (b *Board) wrap(r, c int) (int, int) {
-	r = (r + b.Rows()) % b.Rows()
-	c = (c + b.Cols()) % b.Cols()
-	return r, c
-}
-
 func main() {
 	const (
 		X = true

@@ -1,8 +1,8 @@
 package main
 
 type Board struct {
-	cells [][]bool
-	temp  [][]bool
+	cells [][]byte
+	temp  [][]byte
 }
 
 func (b *Board) Advance(steps int) {
@@ -14,39 +14,53 @@ func (b *Board) Advance(steps int) {
 func (b *Board) advance() {
 	for i := range b.cells {
 		for j := range b.cells[i] {
-			neigh := b.Neighbors(i, j)
+			neigh := b.neighbors(i, j)
 			alive := b.cells[i][j]
-			b.temp[i][j] = NextState(alive, neigh)
+			b.temp[i][j] = nextState(alive, neigh)
 		}
 	}
 	b.cells, b.temp = b.temp, b.cells
 }
 
+func nextState(alive byte, neighbors byte) byte {
+	if alive == 1 && neighbors == 2 || neighbors == 3 {
+		return 1
+	}
+	return 0
+}
+
 func (b *Board) Neighbors(r, c int) int {
-	count := 0
+	return int(b.neighbors(r, c))
+}
+
+func (b *Board) neighbors(r, c int) byte {
+	var count byte
 	for rr := r - 1; rr <= r+1; rr++ {
 		for cc := c - 1; cc <= c+1; cc++ {
-			if b.Get(rr, cc) {
-				count++
-			}
+			count += b.get(rr, cc)
 		}
 	}
 	// do not count self
-	if b.Get(r, c) {
-		count--
-	}
+	count -= b.get(r, c)
 	return count
 }
 
 func (b *Board) Set(r, c int, v bool) {
-	b.cells[r][c] = v
+	if v {
+		b.cells[r][c] = 1
+	} else {
+		b.cells[r][c] = 0
+	}
 }
 
-func (b *Board) Get(r, c int) bool {
+func (b *Board) get(r, c int) byte {
 	if r < 0 || c < 0 || r >= b.Rows() || c >= b.Cols() {
-		return false
+		return 0
 	}
 	return b.cells[r][c]
+}
+func (b *Board) Get(r, c int) bool {
+	return b.get(r, c) == 1
 }
 func (b *Board) Rows() int {
 	return len(b.cells)
@@ -61,4 +75,13 @@ func MakeBoard(rows, cols int) *Board {
 		cells: makeMatrix(rows, cols),
 		temp:  makeMatrix(rows, cols),
 	}
+}
+
+func makeMatrix(rows, cols int) [][]byte {
+	all := make([]byte, rows*cols)
+	c := make([][]byte, rows)
+	for i := range c {
+		c[i] = all[i*cols : (i+1)*cols]
+	}
+	return c
 }
