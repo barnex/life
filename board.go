@@ -41,8 +41,14 @@ func (b *Board) advRow(r int, up, me, down []byte) {
 	b.advSlow(r, 0, up, me, down)
 	for c := 1; c < cols-1; c++ {
 
-		alive := b.cells[r][c]
-		neigh := b.innerNeigh(up, me, down, c)
+		alive := me[c]
+		cL := c - 1
+		cR := c + 1
+		cUp := up[cL] + up[c] + up[cR]
+		cMe := me[cL] + me[cR]
+		cDo := down[cL] + down[c] + down[cR]
+		neigh := cUp + cMe + cDo
+
 		b.temp[r][c] = nextState(alive, neigh)
 
 	}
