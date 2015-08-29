@@ -53,10 +53,10 @@ func TestBoardAccess(t *testing.T) {
 		{2, 2, false},
 		{2, 3, true},
 
-		{0, 4, true},
+		{0, 4, false},
 		{-1, 0, false},
 		{0, -1, false},
-		{3, 0, true},
+		{3, 0, false},
 	}
 
 	for _, c := range test {

@@ -1,2 +1,4 @@
 life
 *.swp
+life.test
+cpu.pprof

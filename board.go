@@ -39,12 +39,13 @@ func (b *Board) Neighbors(r, c int) int {
 }
 
 func (b *Board) Set(r, c int, v bool) {
-	r, c = b.wrap(r, c)
 	b.cells[r][c] = v
 }
 
 func (b *Board) Get(r, c int) bool {
-	r, c = b.wrap(r, c)
+	if r < 0 || c < 0 || r >= b.Rows() || c >= b.Cols() {
+		return false
+	}
 	return b.cells[r][c]
 }
 func (b *Board) Rows() int {
