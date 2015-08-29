@@ -1,8 +1,52 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
-func TestAdvance(t *testing.T) {
+func ExampleAdvance() {
+	b := MakeBoard(16, 16)
+	SetRand(b, 0, 0.5)
+
+	fmt.Print(Fmt(b))
+	b.Advance(1)
+	fmt.Print(Fmt(b))
+
+	// Output:
+	//.X.XXXX..XX..X.X
+	//.X..XX.XX.XX.XXX
+	//X.XX.X.X.X...X..
+	//X.X.X.X...X...XX
+	//..XXX.XX.XXX.X..
+	//..X...X.X.XXXX..
+	//XXXXX.....X.X...
+	//XX.XX.X.X..X.XXX
+	//.X..XXXX...X...X
+	//X.X.XX...X.X.X..
+	//.XX.X.XXXXXXX...
+	//X..X.XXX...XXXX.
+	//.X......X.X.XX..
+	//.XX..X..X.....XX
+	//.XXX.X...XX..X..
+	//....X.XXX.XX....
+	//
+	//..XX..XXXXXXXX.X
+	//XX.....X...X.X.X
+	//X.X....X.X.XXX..
+	//...........XXXX.
+	//..X.X.X.X....X..
+	//......X.X....X..
+	//X...X.....X.....
+	//......X...XX.XXX
+	//.......XX..X.X.X
+	//X.X......X......
+	//X.X......X....X.
+	//X..XXX........X.
+	//XX..XX..XX.....X
+	//X..XX...X.XXX.X.
+	//.X.X.X....XX..X.
+	//..XXXXXXX.XX....
 
 }
 

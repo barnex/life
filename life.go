@@ -20,9 +20,9 @@ func Fmt(b *Board) string {
 		for j := 0; j < cols; j++ {
 			v := b.Get(i, j)
 			if v {
-				fmt.Fprint(&buf, "x")
+				fmt.Fprint(&buf, "X")
 			} else {
-				fmt.Fprint(&buf, " ")
+				fmt.Fprint(&buf, ".")
 			}
 		}
 		fmt.Fprintln(&buf)
