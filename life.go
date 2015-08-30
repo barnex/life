@@ -1,61 +1,46 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"image"
 	"image/color"
 	"image/png"
 	"log"
-	"math/rand"
 	"net/http"
 )
-
-func Fmt(b *Board) string {
-	rows := b.Rows()
-	cols := b.Cols()
-	var buf bytes.Buffer
-	fmt.Fprintln(&buf)
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			v := b.Get(i, j)
-			if v {
-				fmt.Fprint(&buf, "X")
-			} else {
-				fmt.Fprint(&buf, ".")
-			}
-		}
-		fmt.Fprintln(&buf)
-	}
-	return buf.String()
-}
-
-func BoardSet(b *Board, roff, coff int, in [][]bool) {
-	for r, row := range in {
-		for c, v := range row {
-			b.Set(r+roff, c+coff, v)
-		}
-	}
-}
-
-func SetRand(b *Board, seed int64, fill float64) {
-	rand.Seed(seed)
-	for r := 0; r < b.Rows(); r++ {
-		for c := 0; c < b.Cols(); c++ {
-			v := (rand.Float64() <= fill)
-			b.Set(r, c, v)
-		}
-	}
-}
 
 func main() {
 	const (
 		X = true
 		O = false
 	)
-	N := 256
+	N := 128
 	b := MakeBoard(N, N)
-	SetRand(b, 0, 0.1)
+
+	BoardSet(b, 0, 0, [][]bool{
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, X, O, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, X, X, O, O, O, O, O, O, X, X, O, O, O, O, O, O, O, O, O, O, O, O, X, X, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, X, O, O, O, X, O, O, O, O, X, X, O, O, O, O, O, O, O, O, O, O, O, O, X, X, O, O, O, O, O, O},
+		{O, X, X, O, O, O, O, O, O, O, O, X, O, O, O, O, O, X, O, O, O, X, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, X, X, O, O, O, O, O, O, O, O, X, O, O, O, X, O, X, X, O, O, O, O, X, O, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, X, O, O, O, O, O, X, O, O, O, O, O, O, O, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, X, O, O, O, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, X, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+	})
 
 	http.HandleFunc("/img", handleImg)
 	http.HandleFunc("/", handleRoot)
@@ -92,8 +77,10 @@ const JS = `
 <script>
 setInterval(function() {
     var el = document.getElementById('img');
-    el.src = '/img?rand=' + Math.random();
-}, 50);
+	if (typeof img.naturalWidth !== "undefined" && img.naturalWidth === 0){
+   		el.src = '/img?rand=' + Math.random();
+	}
+}, 100);
 </script>
 </head>
 <body>
