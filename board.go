@@ -28,13 +28,9 @@ func (b *Board) Set(R, C int, v bool) {
 	if v {
 		val = 1
 	}
-	r, c := uint(R), uint(C)
-	w := c / 16
-	s := (c % 16) * 4
-	word := b.quads[r][w]
-	word &= (0xFFFFFFFFFFFFFFFF ^ (0xE << s))
-	word |= (val << s)
-	b.quads[r][w] = word
+
+	r, w, s := rowWordShift(R, C)
+	b.quads[r][w] = setQuad(b.quads[r][w], s, val)
 }
 
 func (b *Board) Get(R, C int) bool {
@@ -42,12 +38,8 @@ func (b *Board) Get(R, C int) bool {
 		return false
 	}
 
-	r, c := uint(R), uint(C)
-	w := c / 16
-	s := (c % 16) * 4
-	word := b.quads[r][w]
-	word >>= s
-	word &= 0xF
+	r, w, s := rowWordShift(R, C)
+	word := getQuad(b.quads[r][w], s)
 
 	switch word {
 	case 0:
@@ -55,8 +47,25 @@ func (b *Board) Get(R, C int) bool {
 	case 1:
 		return true
 	default:
-		panic(fmt.Sprintf("bad quad at %v,%v: %v", word))
+		panic(fmt.Sprintf("bad quad at %v,%v: %v", R, C, word))
 	}
+}
+
+func rowWordShift(row, col int) (r uint, w int, s uint) {
+	r, w, s = uint(row), col/16, (uint(col)%16)*4
+	return
+}
+
+func setQuad(word uint64, s uint, val uint64) uint64 {
+	word &= (0xFFFFFFFFFFFFFFFF ^ (0xE << s))
+	word |= (val << s)
+	return word
+}
+
+func getQuad(word uint64, s uint) uint64 {
+	word >>= s
+	word &= 0xF
+	return word
 }
 
 func (b *Board) Rows() int {
