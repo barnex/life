@@ -1,3 +1,5 @@
+//+build ignore
+
 package main
 
 import (
@@ -7,6 +9,8 @@ import (
 	"image/png"
 	"log"
 	"net/http"
+
+	. "."
 )
 
 func main() {
@@ -14,8 +18,9 @@ func main() {
 		X = true
 		O = false
 	)
-	N := 128
+	N := 256
 	b := MakeBoard(N, N)
+	SetRand(b, 2, 0.08)
 
 	BoardSet(b, 0, 0, [][]bool{
 		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
@@ -56,11 +61,11 @@ func main() {
 
 	for {
 		select {
-		default:
-			b.Advance(1)
+		//default:
+		//	b.Advance(1)
 		case img := <-request:
 			rendered <- render(img, b)
-			b.Advance(1) // make sure we advance at lease one step per rendering
+			b.Advance(4) // make sure we advance at lease one step per rendering
 		}
 	}
 }
@@ -77,10 +82,8 @@ const JS = `
 <script>
 setInterval(function() {
     var el = document.getElementById('img');
-	if (typeof img.naturalWidth !== "undefined" && img.naturalWidth === 0){
-   		el.src = '/img?rand=' + Math.random();
-	}
-}, 100);
+   	el.src = '/img?rand=' + Math.random();
+}, 50);
 </script>
 </head>
 <body>
