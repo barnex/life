@@ -1,5 +1,6 @@
 //+build ignore
 
+// weblife runs game of life and displays results in a browser.
 package main
 
 import (
@@ -47,11 +48,23 @@ func main() {
 		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 	})
 
+	HandleWeb(b)
+}
+
+var (
+	trash    = make(chan *image.RGBA, 1)
+	request  = make(chan *image.RGBA)
+	rendered = make(chan *image.RGBA)
+)
+
+func HandleWeb(b *Board) {
 	http.HandleFunc("/img", handleImg)
 	http.HandleFunc("/", handleRoot)
 
+	const addr = ":8080"
 	go func() {
-		err := http.ListenAndServe(":8080", nil)
+		fmt.Println("point your browser to", addr)
+		err := http.ListenAndServe(addr, nil)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -61,20 +74,14 @@ func main() {
 
 	for {
 		select {
-		//default:
-		//	b.Advance(1)
+		default:
+			b.Advance(1)
 		case img := <-request:
 			rendered <- render(img, b)
-			b.Advance(4) // make sure we advance at lease one step per rendering
+			b.Advance(1) // make sure we advance
 		}
 	}
 }
-
-var (
-	trash    = make(chan *image.RGBA, 1)
-	request  = make(chan *image.RGBA)
-	rendered = make(chan *image.RGBA)
-)
 
 const JS = `
 <html>
