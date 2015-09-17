@@ -4,7 +4,35 @@ import "fmt"
 
 type Board struct {
 	rows, cols int
-	quads      [][]uint64
+	nibs       [][]uint64
+	hsum       [][]uint64
+	vsum       [][]uint64
+}
+
+func (b *Board) count() {
+	for r, row := range b.nibs {
+		rowHSum(b.hsum[r], row)
+	}
+}
+
+func rowHSum(dst, src []uint64) {
+	var prev uint64 = 0
+
+	for i := 0; i < len(src)-1; i++ {
+		centre := src[i]
+		left := (prev & 0xF000000000000000) >> ((16-1)*4) | (centre << 4)
+		right := src[i+1]
+
+		dst[i] = 
+	}
+}
+
+func countRow(row []uint64) []uint64 {
+	sum := make([]uint64, len(row))
+	for w, word := range row {
+		sum[w] = word + (word << 4) + (word >> 4)
+	}
+	return sum
 }
 
 func (b *Board) Advance(steps int) {
@@ -30,7 +58,7 @@ func (b *Board) Set(R, C int, v bool) {
 	}
 
 	r, w, s := rowWordShift(R, C)
-	b.quads[r][w] = setQuad(b.quads[r][w], s, val)
+	b.nibs[r][w] = setnib(b.nibs[r][w], s, val)
 }
 
 func (b *Board) Get(R, C int) bool {
@@ -39,7 +67,7 @@ func (b *Board) Get(R, C int) bool {
 	}
 
 	r, w, s := rowWordShift(R, C)
-	word := getQuad(b.quads[r][w], s)
+	word := getnib(b.nibs[r][w], s)
 
 	switch word {
 	case 0:
@@ -47,7 +75,7 @@ func (b *Board) Get(R, C int) bool {
 	case 1:
 		return true
 	default:
-		panic(fmt.Sprintf("bad quad at %v,%v: %v", R, C, word))
+		panic(fmt.Sprintf("bad nib at %v,%v: %v", R, C, word))
 	}
 }
 
@@ -56,13 +84,13 @@ func rowWordShift(row, col int) (r uint, w int, s uint) {
 	return
 }
 
-func setQuad(word uint64, s uint, val uint64) uint64 {
+func setnib(word uint64, s uint, val uint64) uint64 {
 	word &= (0xFFFFFFFFFFFFFFFF ^ (0xE << s))
 	word |= (val << s)
 	return word
 }
 
-func getQuad(word uint64, s uint) uint64 {
+func getnib(word uint64, s uint) uint64 {
 	word >>= s
 	word &= 0xF
 	return word
@@ -81,9 +109,11 @@ func MakeBoard(rows, cols int) *Board {
 	ints := ((cols + 15) / 16)
 
 	return &Board{
-		rows:  rows,
-		cols:  cols,
-		quads: makeMatrix(rows, ints),
+		rows: rows,
+		cols: cols,
+		nibs: makeMatrix(rows, ints),
+		hsum: makeMatrix(rows, ints),
+		vsum: makeMatrix(rows, ints),
 	}
 }
 
