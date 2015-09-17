@@ -74,11 +74,12 @@ func HandleWeb(b *Board) {
 
 	for {
 		select {
-		default:
-			b.Advance(1)
+		//default:
+		//	b.Advance(1)
 		case img := <-request:
 			rendered <- render(img, b)
 			b.Advance(1) // make sure we advance
+			//time.Sleep(time.Second)
 		}
 	}
 }

@@ -1,59 +1,72 @@
 package life
 
 type Board struct {
-	cells          [][]byte
-	temp           [][]byte
-	ps_1, ps0, ps1 []byte
+	cells                     [][]byte // cell life states
+	temp                      [][]byte // next state, swap with cells after advance
+	edgerow                   []byte   // row with zeros used at edges
+	sumPrev, sumCurr, sumNext []byte   // partial sums for upper, me, down row
 }
 
+// Advance advances the state by a number of steps.
 func (b *Board) Advance(steps int) {
-	//zero(b.ps_1)
-	//zero(b.ps0)
-	//zero(b.ps1)
-
 	for i := 0; i < steps; i++ {
 		b.advance()
 	}
 }
 
-func zero(ps []byte) {
-	for i := range ps {
-		ps[i] = 0
-	}
-}
-
 func (b *Board) advance() {
 	rows := b.Rows()
-	zero(b.ps0)
+
+	sumPrev := b.sumPrev
+	sumCurr := b.sumCurr
+	sumNext := b.sumNext
+
 	r := 0
-	b.advRow(r, b.ps0, b.cells[r], b.cells[r+1])
+	zero(sumPrev)
+	b.rowSum(r, sumCurr)
+	b.rowSum(r+1, sumNext)
+	b.advRow(r, b.edgerow, sumCurr, sumNext)
+
 	for r = 1; r < rows-1; r++ {
-		b.advRow(r, b.cells[r-1], b.cells[r], b.cells[r+1])
+		sumPrev = sumCurr
+		sumCurr = sumNext
+		b.rowSum(r+1, sumNext)
+		b.advRow(r, sumPrev, sumCurr, sumNext)
 	}
+
 	r = rows - 1
-	b.advRow(r, b.cells[r-1], b.cells[r], b.ps0)
+	sumPrev = sumCurr
+	sumCurr = sumNext
+	b.advRow(r, sumPrev, sumCurr, b.edgerow)
 
 	b.cells, b.temp = b.temp, b.cells
 }
 
-func (b *Board) advRow(r int, up, me, down []byte) {
-	cols := b.Cols()
-	b.advSlow(r, 0, up, me, down)
-	b.advInner(r, up, me, down)
-	b.advSlow(r, cols-1, up, me, down)
+func (b *Board) rowSum(r int, result []byte) {
+	row := b.cells[r]
+	last := len(row) - 1
+
+	var prev byte = 0
+	var curr byte = row[0]
+	var next byte = row[1]
+
+	result[0] = curr + next
+	for i := 1; i < last; i++ {
+		prev = curr
+		curr = next
+		next = row[i+1]
+		result[i] = prev + curr + next
+	}
+
+	result[last] = row[last-1] + row[last]
 }
 
-func (b *Board) advInner(r int, up, me, down []byte) {
-	cols := b.Cols()
-	result := b.temp[r]
-	for c := 1; c < cols-1; c++ {
-		alive := me[c]
-		cL := c - 1
-		cR := c + 1
-		neigh := up[cL] + up[c] + up[cR] +
-			me[cL] + me[cR] +
-			down[cL] + down[c] + down[cR]
-		result[c] = nextState(alive, neigh)
+func (b *Board) advRow(r int, sumPrev, sumCurr, sumNext []byte) {
+	rowIn := b.cells[r]
+	rowOut := b.temp[r]
+	for c, alive := range rowIn {
+		neigh := sumPrev[c] + sumCurr[c] + sumNext[c] - alive
+		rowOut[c] = nextState(alive, neigh)
 	}
 }
 
@@ -132,11 +145,12 @@ func (b *Board) Cols() int {
 
 func MakeBoard(rows, cols int) *Board {
 	return &Board{
-		cells: makeMatrix(rows, cols),
-		temp:  makeMatrix(rows, cols),
-		ps_1:  make([]byte, cols),
-		ps0:   make([]byte, cols),
-		ps1:   make([]byte, cols),
+		cells:   makeMatrix(rows, cols),
+		temp:    makeMatrix(rows, cols),
+		edgerow: make([]byte, cols),
+		sumPrev: make([]byte, cols),
+		sumCurr: make([]byte, cols),
+		sumNext: make([]byte, cols),
 	}
 }
 
@@ -147,4 +161,10 @@ func makeMatrix(rows, cols int) [][]byte {
 		c[i] = all[i*cols : (i+1)*cols]
 	}
 	return c
+}
+
+func zero(ps []byte) {
+	for i := range ps {
+		ps[i] = 0
+	}
 }

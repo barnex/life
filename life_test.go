@@ -5,6 +5,43 @@ import (
 	"testing"
 )
 
+func TestRowSum(t *testing.T) {
+	rows := 40
+	cols := 50
+	b := MakeBoard(rows, cols)
+	s := make([]byte, cols)
+
+	b.Set(0, 0, true)
+	b.Set(0, 1, true)
+	b.rowSum(0, s)
+	if s[0] != 2 {
+		t.Fail()
+	}
+
+	b.Set(5, 7, true)
+	b.Set(5, 8, true)
+	b.Set(5, 9, true)
+	b.rowSum(5, s)
+	if s[6] != 1 {
+		t.Fail()
+	}
+	if s[7] != 2 {
+		t.Fail()
+	}
+	if s[8] != 3 {
+		t.Fail()
+	}
+	if s[9] != 2 {
+		t.Fail()
+	}
+	if s[10] != 1 {
+		t.Fail()
+	}
+	if s[11] != 0 {
+		t.Fail()
+	}
+}
+
 func ExampleGosperGliderGun() {
 	const (
 		X = true

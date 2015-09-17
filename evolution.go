@@ -1,5 +1,6 @@
 //+build ignore
 
+// have boards evolve and extract statistics
 package main
 
 import (
