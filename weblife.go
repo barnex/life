@@ -19,7 +19,7 @@ func main() {
 		X = true
 		O = false
 	)
-	N := 256
+	N := 512
 	b := MakeBoard(N, N)
 	SetRand(b, 2, 0.08)
 

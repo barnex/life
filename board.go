@@ -44,12 +44,12 @@ func (b *Board) advance() {
 
 func (b *Board) rowSum(r int, result []byte) {
 	row := b.cells[r]
-	last := len(row) - 1
 
 	var prev byte = 0
 	var curr byte = row[0]
 	var next byte = row[1]
 
+	last := len(row) - 1
 	result[0] = curr + next
 	for i := 1; i < last; i++ {
 		prev = curr
@@ -70,11 +70,11 @@ func (b *Board) advRow(r int, sumPrev, sumCurr, sumNext []byte) {
 	}
 }
 
-func (b *Board) advSlow(r, c int, up, me, down []byte) {
-	alive := b.cells[r][c]
-	neigh := b.neighbors(r, c)
-	b.temp[r][c] = nextState(alive, neigh)
-}
+//func (b *Board) advSlow(r, c int, up, me, down []byte) {
+//	alive := b.cells[r][c]
+//	neigh := b.neighbors(r, c)
+//	b.temp[r][c] = nextState(alive, neigh)
+//}
 
 func nextState(alive byte, neighbors byte) byte {
 	if alive == 1 && neighbors == 2 || neighbors == 3 {

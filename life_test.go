@@ -40,6 +40,22 @@ func TestRowSum(t *testing.T) {
 	if s[11] != 0 {
 		t.Fail()
 	}
+
+	b.Set(5, cols-1, true)
+	if s[cols-1] != 1 {
+		t.Fail()
+	}
+	if s[cols-2] != 1 {
+		t.Fail()
+	}
+
+	//b.Set(6, cols-2, true)
+	//if s[cols-1] != 1 {
+	//	t.Fail()
+	//}
+	//if s[cols-2] != 1 {
+	//	t.Fail()
+	//}
 }
 
 func ExampleGosperGliderGun() {
