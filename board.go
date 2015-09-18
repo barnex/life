@@ -1,9 +1,10 @@
 package life
 
 type Board struct {
-	cells [][]byte
-	temp  [][]byte
-	empty []byte
+	cells  [][]byte // current cells
+	temp   [][]byte // buffer for next-gen cells
+	empty  []byte   // empty cell row used at borders
+	colsum []byte   //buffer for vertical sums by 3
 }
 
 func (b *Board) Advance(steps int) {
@@ -40,6 +41,9 @@ func (b *Board) advRow(r int, up, me, down []byte) {
 }
 
 func (b *Board) advInner(r int, up, me, down []byte) {
+
+	//colSum(up, me, down, sum)
+
 	cols := b.Cols()
 	result := b.temp[r]
 	for c := 1; c < cols-1; c++ {
@@ -128,9 +132,10 @@ func (b *Board) Cols() int {
 
 func MakeBoard(rows, cols int) *Board {
 	return &Board{
-		cells: makeMatrix(rows, cols),
-		temp:  makeMatrix(rows, cols),
-		empty: make([]byte, cols),
+		cells:  makeMatrix(rows, cols),
+		temp:   makeMatrix(rows, cols),
+		empty:  make([]byte, cols),
+		colsum: make([]byte, cols),
 	}
 }
 
