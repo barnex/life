@@ -10,8 +10,20 @@ const (
 	O = false
 )
 
+func ExampleAs64() {
+	arr := []byte{
+		1, 0, 0, 0, 0, 0, 0, 0,
+		0, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 1,
+	}
+	fmt.Println(as64(arr))
+
+	//Output:
+	// [1 256 72057594037927936]
+}
+
 func ExampleColSum() {
-	rows, cols := 6, 5
+	rows, cols := 6, 8
 	b := MakeBoard(rows, cols)
 
 	BoardSet(b, 0, 0, [][]bool{
@@ -33,10 +45,10 @@ func ExampleColSum() {
 	}
 
 	// Output:
-	//1,1,0,1,1,
-	//1,1,0,2,2,
-	//0,1,0,2,3,
-	//0,0,0,1,2,
+	//1,1,0,1,1,0,0,0,
+	//1,1,0,2,2,0,0,0,
+	//0,1,0,2,3,0,0,0,
+	//0,0,0,1,2,0,0,0,
 }
 
 func ExampleGosperGliderGun() {

@@ -1,5 +1,7 @@
 package life
 
+import "unsafe"
+
 type Board struct {
 	rows, cols int
 	cells      [][]byte // current cells
@@ -34,14 +36,21 @@ func (b *Board) advance() {
 	b.cells, b.temp = b.temp, b.cells
 }
 
-func colSum(dst, up, me, down []byte) {
-	//dst64 := as64(dst)
-	//up64 := as64(up)
-	//me64 := as64(me)
-	//down := as64(down)
+func as64(bytes []byte) []uint64 {
+	if len(bytes)%8 != 0 {
+		panic("as64")
+	}
+	return (*((*[1 << 31]uint64)(unsafe.Pointer(&bytes[0]))))[:len(bytes)/8]
+}
 
-	for i := range dst {
-		dst[i] = up[i] + me[i] + down[i]
+func colSum(dst, up, me, down []byte) {
+	dst64 := as64(dst)
+	up64 := as64(up)
+	me64 := as64(me)
+	down64 := as64(down)
+
+	for i := range dst64 {
+		dst64[i] = up64[i] + me64[i] + down64[i]
 	}
 }
 
