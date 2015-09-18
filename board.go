@@ -1,10 +1,11 @@
 package life
 
 type Board struct {
-	cells  [][]byte // current cells
-	temp   [][]byte // buffer for next-gen cells
-	empty  []byte   // empty cell row used at borders
-	colsum []byte   //buffer for vertical sums by 3
+	rows, cols int
+	cells      [][]byte // current cells
+	temp       [][]byte // buffer for next-gen cells
+	empty      []byte   // empty cell row used at borders
+	colsum     []byte   //buffer for vertical sums by 3
 }
 
 func (b *Board) Advance(steps int) {
@@ -34,6 +35,11 @@ func (b *Board) advance() {
 }
 
 func colSum(dst, up, me, down []byte) {
+	//dst64 := as64(dst)
+	//up64 := as64(up)
+	//me64 := as64(me)
+	//down := as64(down)
+
 	for i := range dst {
 		dst[i] = up[i] + me[i] + down[i]
 	}
@@ -52,9 +58,11 @@ func (b *Board) advRow(r int, up, me, down []byte) {
 	// first col
 	c := 0
 	alive := me[c]
+
 	prevCS = 0
 	currCS = cs[c]
 	nextCS = cs[c+1]
+
 	neigh := prevCS + currCS + nextCS
 	result[c] = nextLUT[(alive<<4)|neigh]
 
@@ -113,19 +121,22 @@ func (b *Board) Get(r, c int) bool {
 	return b.get(r, c) == 1
 }
 func (b *Board) Rows() int {
-	return len(b.cells)
+	return b.rows
 }
 
 func (b *Board) Cols() int {
-	return len(b.cells[0])
+	return b.cols
 }
 
 func MakeBoard(rows, cols int) *Board {
+	roundCols := ((cols-1)/8 + 1) * 8 // round up to multiple of 8 so it fits 64bit int
 	return &Board{
-		cells:  makeMatrix(rows, cols),
-		temp:   makeMatrix(rows, cols),
-		empty:  make([]byte, cols),
-		colsum: make([]byte, cols),
+		rows:   rows,
+		cols:   cols,
+		cells:  makeMatrix(rows, roundCols),
+		temp:   makeMatrix(rows, roundCols),
+		empty:  make([]byte, roundCols),
+		colsum: make([]byte, roundCols),
 	}
 }
 
