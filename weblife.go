@@ -21,7 +21,7 @@ func main() {
 	)
 	N := 256
 	b := MakeBoard(N, N)
-	SetRand(b, 2, 0.08)
+	SetRand(b, 2, 0.1)
 
 	BoardSet(b, 0, 0, [][]bool{
 		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
