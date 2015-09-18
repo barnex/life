@@ -47,16 +47,26 @@ func (b *Board) advRow(r int, up, me, down []byte) {
 	cols := b.Cols()
 	result := b.temp[r]
 
+	var prevCS, currCS, nextCS byte
+
 	// first col
 	c := 0
 	alive := me[c]
-	neigh := cs[c] + cs[c+1]
+	prevCS = 0
+	currCS = cs[c]
+	nextCS = cs[c+1]
+	neigh := prevCS + currCS + nextCS
 	result[c] = nextLUT[(alive<<4)|neigh]
 
 	// bulk cols
 	for c := 1; c < cols-1; c++ {
 		alive = me[c]
-		neigh = cs[c-1] + cs[c] + cs[c+1]
+
+		prevCS = currCS
+		currCS = nextCS
+		nextCS = cs[c+1]
+
+		neigh = prevCS + currCS + nextCS
 		result[c] = nextLUT[(alive<<4)|neigh]
 	}
 
