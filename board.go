@@ -1,16 +1,12 @@
 package life
 
 type Board struct {
-	cells          [][]byte
-	temp           [][]byte
-	ps_1, ps0, ps1 []byte
+	cells [][]byte
+	temp  [][]byte
+	empty []byte
 }
 
 func (b *Board) Advance(steps int) {
-	//zero(b.ps_1)
-	//zero(b.ps0)
-	//zero(b.ps1)
-
 	for i := 0; i < steps; i++ {
 		b.advance()
 	}
@@ -24,14 +20,13 @@ func zero(ps []byte) {
 
 func (b *Board) advance() {
 	rows := b.Rows()
-	zero(b.ps0)
 	r := 0
-	b.advRow(r, b.ps0, b.cells[r], b.cells[r+1])
+	b.advRow(r, b.empty, b.cells[r], b.cells[r+1])
 	for r = 1; r < rows-1; r++ {
 		b.advRow(r, b.cells[r-1], b.cells[r], b.cells[r+1])
 	}
 	r = rows - 1
-	b.advRow(r, b.cells[r-1], b.cells[r], b.ps0)
+	b.advRow(r, b.cells[r-1], b.cells[r], b.empty)
 
 	b.cells, b.temp = b.temp, b.cells
 }
@@ -134,9 +129,7 @@ func MakeBoard(rows, cols int) *Board {
 	return &Board{
 		cells: makeMatrix(rows, cols),
 		temp:  makeMatrix(rows, cols),
-		ps_1:  make([]byte, cols),
-		ps0:   make([]byte, cols),
-		ps1:   make([]byte, cols),
+		empty: make([]byte, cols),
 	}
 }
 

@@ -221,7 +221,6 @@ func TestNeighbors(t *testing.T) {
 			t.Errorf("%#v: got: %v", c, have)
 		}
 	}
-
 }
 
 func TestBoardAccess(t *testing.T) {
