@@ -56,8 +56,19 @@ func (b *Board) advInner(r int, up, me, down []byte) {
 	result := b.temp[r]
 	for c := 1; c < cols-1; c++ {
 		alive := me[c]
-		neigh := cs[c-1] + cs[c] + cs[c+1] - alive
-		result[c] = nextState(alive, neigh)
+		neigh := cs[c-1] + cs[c] + cs[c+1]
+		result[c] = nextLUT[(alive<<4)|neigh]
+	}
+}
+
+var nextLUT [32]byte
+
+func init() {
+	for _, alive := range []byte{0, 1} {
+		for neigh := byte(0); neigh <= 8; neigh++ {
+			idx := (alive << 4) | neigh
+			nextLUT[idx] = nextState(alive, neigh-alive) // self is included in neigh
+		}
 	}
 }
 
