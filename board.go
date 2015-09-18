@@ -35,6 +35,7 @@ func (b *Board) advance() {
 
 func (b *Board) advRow(r int, up, me, down []byte) {
 	cols := b.Cols()
+
 	b.advSlow(r, 0, up, me, down)
 	b.advInner(r, up, me, down)
 	b.advSlow(r, cols-1, up, me, down)
@@ -55,11 +56,7 @@ func (b *Board) advInner(r int, up, me, down []byte) {
 	result := b.temp[r]
 	for c := 1; c < cols-1; c++ {
 		alive := me[c]
-		cL := c - 1
-		cR := c + 1
-		neigh := up[cL] + up[c] + up[cR] +
-			me[cL] + me[cR] +
-			down[cL] + down[c] + down[cR]
+		neigh := cs[c-1] + cs[c] + cs[c+1] - alive
 		result[c] = nextState(alive, neigh)
 	}
 }
