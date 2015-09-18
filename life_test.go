@@ -5,11 +5,41 @@ import (
 	"testing"
 )
 
+const (
+	X = true
+	O = false
+)
+
+func ExampleColSum() {
+	rows, cols := 6, 5
+	b := MakeBoard(rows, cols)
+
+	BoardSet(b, 0, 0, [][]bool{
+		{O, O, O, O, O},
+		{X, O, O, O, O},
+		{O, X, O, X, X},
+		{O, O, O, X, X},
+		{O, O, O, O, X},
+		{O, O, O, O, O},
+	})
+
+	rs := make([]byte, cols)
+	for r := 1; r < rows-1; r++ {
+		colSum(rs, b.cells[r-1], b.cells[r], b.cells[r+1])
+		for _, c := range rs {
+			fmt.Print(c, ",")
+		}
+		fmt.Println()
+	}
+
+	// Output:
+	//1,1,0,1,1,
+	//1,1,0,2,2,
+	//0,1,0,2,3,
+	//0,0,0,1,2,
+}
+
 func ExampleGosperGliderGun() {
-	const (
-		X = true
-		O = false
-	)
 	b := MakeBoard(40, 50)
 
 	BoardSet(b, 0, 0, [][]bool{

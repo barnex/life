@@ -40,9 +40,16 @@ func (b *Board) advRow(r int, up, me, down []byte) {
 	b.advSlow(r, cols-1, up, me, down)
 }
 
+func colSum(dst, up, me, down []byte) {
+	for i := range dst {
+		dst[i] = up[i] + me[i] + down[i]
+	}
+}
+
 func (b *Board) advInner(r int, up, me, down []byte) {
 
-	//colSum(up, me, down, sum)
+	cs := b.colsum
+	colSum(cs, up, me, down)
 
 	cols := b.Cols()
 	result := b.temp[r]
