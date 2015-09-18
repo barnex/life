@@ -17,20 +17,10 @@ func (b *Board) Advance(steps int) {
 }
 
 func (b *Board) advance() {
-	rows := b.Rows()
 
-	// first row
-	r := 0
-	b.advRow(r, b.empty, b.cells[r], b.cells[r+1])
-
-	// bulk rows
-	for r = 1; r < rows-1; r++ {
-		b.advRow(r, b.cells[r-1], b.cells[r], b.cells[r+1])
+	for r := 0; r < b.rows; r++ {
+		b.advRow(r)
 	}
-
-	// last rows
-	r = rows - 1
-	b.advRow(r, b.cells[r-1], b.cells[r], b.empty)
 
 	// swap: temp becomes current cells
 	b.cells, b.temp = b.temp, b.cells
@@ -54,7 +44,18 @@ func colSum(dst, up, me, down []byte) {
 	}
 }
 
-func (b *Board) advRow(r int, up, me, down []byte) {
+func (b *Board) advRow(r int) {
+
+	// get upper/lower rows without going out of bounds
+	up := b.empty
+	if r > 0 {
+		up = b.cells[r-1]
+	}
+	me := b.cells[r]
+	down := b.empty
+	if r < b.rows-1 {
+		down = b.cells[r+1]
+	}
 
 	cs := b.colsum
 	colSum(cs, up, me, down)
