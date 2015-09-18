@@ -230,29 +230,6 @@ func ExampleSetRand() {
 	//
 }
 
-func TestNeighbors(t *testing.T) {
-	b := MakeBoard(3, 4)
-	b.Set(0, 0, true)
-	b.Set(0, 1, true)
-	b.Set(0, 2, true)
-
-	test := []struct {
-		r, c int
-		want int
-	}{
-		{0, 0, 1},
-		{0, 1, 2},
-		{0, 2, 1},
-		{1, 1, 3},
-	}
-
-	for _, c := range test {
-		if have := b.Neighbors(c.r, c.c); have != c.want {
-			t.Errorf("%#v: got: %v", c, have)
-		}
-	}
-}
-
 func TestBoardAccess(t *testing.T) {
 	b := MakeBoard(3, 4)
 	b.Set(0, 0, true)

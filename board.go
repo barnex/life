@@ -33,32 +33,38 @@ func (b *Board) advance() {
 	b.cells, b.temp = b.temp, b.cells
 }
 
-func (b *Board) advRow(r int, up, me, down []byte) {
-	cols := b.Cols()
-
-	b.advSlow(r, 0, up, me, down)
-	b.advInner(r, up, me, down)
-	b.advSlow(r, cols-1, up, me, down)
-}
-
 func colSum(dst, up, me, down []byte) {
 	for i := range dst {
 		dst[i] = up[i] + me[i] + down[i]
 	}
 }
 
-func (b *Board) advInner(r int, up, me, down []byte) {
+func (b *Board) advRow(r int, up, me, down []byte) {
 
 	cs := b.colsum
 	colSum(cs, up, me, down)
 
 	cols := b.Cols()
 	result := b.temp[r]
+
+	// first col
+	c := 0
+	alive := me[c]
+	neigh := cs[c] + cs[c+1]
+	result[c] = nextLUT[(alive<<4)|neigh]
+
+	// bulk cols
 	for c := 1; c < cols-1; c++ {
-		alive := me[c]
-		neigh := cs[c-1] + cs[c] + cs[c+1]
+		alive = me[c]
+		neigh = cs[c-1] + cs[c] + cs[c+1]
 		result[c] = nextLUT[(alive<<4)|neigh]
 	}
+
+	// last col
+	c = cols - 1
+	alive = me[c]
+	neigh = cs[c-1] + cs[c]
+	result[c] = nextLUT[(alive<<4)|neigh]
 }
 
 var nextLUT [32]byte
@@ -72,52 +78,11 @@ func init() {
 	}
 }
 
-func (b *Board) advSlow(r, c int, up, me, down []byte) {
-	alive := b.cells[r][c]
-	neigh := b.neighbors(r, c)
-	b.temp[r][c] = nextState(alive, neigh)
-}
-
 func nextState(alive byte, neighbors byte) byte {
 	if alive == 1 && neighbors == 2 || neighbors == 3 {
 		return 1
 	}
 	return 0
-}
-
-func (b *Board) Neighbors(r, c int) int {
-	return int(b.neighbors(r, c))
-}
-
-func (b *Board) neighbors(r, c int) byte {
-	cL := c - 1
-	cR := c + 1
-
-	count := b.get(r, cL)
-	count += b.get(r, cR)
-
-	r--
-	count += b.get(r, cL)
-	count += b.get(r, c)
-	count += b.get(r, cR)
-
-	r += 2
-	count += b.get(r, cL)
-	count += b.get(r, c)
-	count += b.get(r, cR)
-
-	return count
-}
-
-func (b *Board) innerNeigh(up, me, do []byte, c int) byte {
-	cL := c - 1
-	cR := c + 1
-
-	cUp := up[cL] + up[c] + up[cR]
-	cMe := me[cL] + me[cR]
-	cDo := do[cL] + do[c] + do[cR]
-
-	return cUp + cMe + cDo
 }
 
 func (b *Board) Set(r, c int, v bool) {
