@@ -1,16 +1,20 @@
 package life
 
-import "unsafe"
+import (
+	"runtime"
+	"unsafe"
+)
 
 type Board struct {
 	rows, cols int
 	cells      [][]byte // current cells
 	temp       [][]byte // buffer for next-gen cells
 	empty      []byte   // empty cell row used at borders
-	colsum     []byte   //buffer for vertical sums by 3
+	work, done chan int
 }
 
 func (b *Board) Advance(steps int) {
+
 	for i := 0; i < steps; i++ {
 		b.advance()
 	}
@@ -19,7 +23,10 @@ func (b *Board) Advance(steps int) {
 func (b *Board) advance() {
 
 	for r := 0; r < b.rows; r++ {
-		b.advRow(r)
+		b.work <- r
+	}
+	for r := 0; r < b.rows; r++ {
+		<-b.done
 	}
 
 	// swap: temp becomes current cells
@@ -44,7 +51,7 @@ func colSum(dst, up, me, down []byte) {
 	}
 }
 
-func (b *Board) advRow(r int) {
+func (b *Board) advRow(r int, cs []byte) {
 
 	// get upper/lower rows without going out of bounds
 	up := b.empty
@@ -57,7 +64,6 @@ func (b *Board) advRow(r int) {
 		down = b.cells[r+1]
 	}
 
-	cs := b.colsum
 	colSum(cs, up, me, down)
 
 	cols := b.Cols()
@@ -140,14 +146,28 @@ func (b *Board) Cols() int {
 
 func MakeBoard(rows, cols int) *Board {
 	roundCols := ((cols-1)/8 + 1) * 8 // round up to multiple of 8 so it fits 64bit int
-	return &Board{
-		rows:   rows,
-		cols:   cols,
-		cells:  makeMatrix(rows, roundCols),
-		temp:   makeMatrix(rows, roundCols),
-		empty:  make([]byte, roundCols),
-		colsum: make([]byte, roundCols),
+	b := &Board{
+		rows:  rows,
+		cols:  cols,
+		cells: makeMatrix(rows, roundCols),
+		temp:  makeMatrix(rows, roundCols),
+		empty: make([]byte, roundCols),
+		work:  make(chan int, rows),
+		done:  make(chan int, rows),
 	}
+
+	for i := 0; i < runtime.NumCPU(); i++ {
+		go func() {
+			colsum := make([]byte, roundCols)
+			for {
+				r := <-b.work
+				b.advRow(r, colsum)
+				b.done <- 1
+			}
+		}()
+	}
+
+	return b
 }
 
 func makeMatrix(rows, cols int) [][]byte {
