@@ -12,22 +12,23 @@ func (b *Board) Advance(steps int) {
 	}
 }
 
-func zero(ps []byte) {
-	for i := range ps {
-		ps[i] = 0
-	}
-}
-
 func (b *Board) advance() {
 	rows := b.Rows()
+
+	// first row
 	r := 0
 	b.advRow(r, b.empty, b.cells[r], b.cells[r+1])
+
+	// bulk rows
 	for r = 1; r < rows-1; r++ {
 		b.advRow(r, b.cells[r-1], b.cells[r], b.cells[r+1])
 	}
+
+	// last rows
 	r = rows - 1
 	b.advRow(r, b.cells[r-1], b.cells[r], b.empty)
 
+	// swap: temp becomes current cells
 	b.cells, b.temp = b.temp, b.cells
 }
 
@@ -140,4 +141,10 @@ func makeMatrix(rows, cols int) [][]byte {
 		c[i] = all[i*cols : (i+1)*cols]
 	}
 	return c
+}
+
+func zero(ps []byte) {
+	for i := range ps {
+		ps[i] = 0
+	}
 }
