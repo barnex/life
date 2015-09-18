@@ -13,26 +13,29 @@ type Board struct {
 	work, done chan int
 }
 
+// Advance the state given number of steps
 func (b *Board) Advance(steps int) {
-
 	for i := 0; i < steps; i++ {
 		b.advance()
 	}
 }
 
+// advance one step
 func (b *Board) advance() {
-
+	// do rows in parallel
 	for r := 0; r < b.rows; r++ {
 		b.work <- r
 	}
+	// wait for result
 	for r := 0; r < b.rows; r++ {
 		<-b.done
 	}
-
 	// swap: temp becomes current cells
 	b.cells, b.temp = b.temp, b.cells
 }
 
+// view byte array as 64-bit int array,
+// so we can add 8 pairs of bytes in one instruction.
 func as64(bytes []byte) []uint64 {
 	if len(bytes)%8 != 0 {
 		panic("as64")
@@ -40,6 +43,9 @@ func as64(bytes []byte) []uint64 {
 	return (*((*[1 << 31]uint64)(unsafe.Pointer(&bytes[0]))))[:len(bytes)/8]
 }
 
+// partial sums towards number of neighbors:
+// dst = up + me + down, per column
+// Arrays must have multiple of 8 size so we can add SIMD-style
 func colSum(dst, up, me, down []byte) {
 	dst64 := as64(dst)
 	up64 := as64(up)
@@ -51,9 +57,11 @@ func colSum(dst, up, me, down []byte) {
 	}
 }
 
+// advance row r to the next state,
+// freely using cs as a buffer.
 func (b *Board) advRow(r int, cs []byte) {
 
-	// get upper/lower rows without going out of bounds
+	// get adjacent rows without going out of bounds
 	up := b.empty
 	if r > 0 {
 		up = b.cells[r-1]
@@ -64,14 +72,15 @@ func (b *Board) advRow(r int, cs []byte) {
 		down = b.cells[r+1]
 	}
 
-	colSum(cs, up, me, down)
-
 	cols := b.Cols()
 	result := b.temp[r]
 
+	colSum(cs, up, me, down)
+
+	// partial column sums left, centered and right of current cell
 	var prevCS, currCS, nextCS byte
 
-	// first col
+	// first column is special
 	c := 0
 	alive := me[c]
 
@@ -82,7 +91,7 @@ func (b *Board) advRow(r int, cs []byte) {
 	neigh := prevCS + currCS + nextCS
 	result[c] = nextLUT[(alive<<4)|neigh]
 
-	// bulk cols
+	// bulk columns don't have borders
 	for c := 1; c < cols-1; c++ {
 		alive = me[c]
 
@@ -94,15 +103,18 @@ func (b *Board) advRow(r int, cs []byte) {
 		result[c] = nextLUT[(alive<<4)|neigh]
 	}
 
-	// last col
+	// last column is special
 	c = cols - 1
 	alive = me[c]
 	neigh = cs[c-1] + cs[c]
 	result[c] = nextLUT[(alive<<4)|neigh]
 }
 
+// look-up table for next state,
+// indexed by (alive<<4)|(neigh+alive)
 var nextLUT [32]byte
 
+// set-up nextLUT
 func init() {
 	for _, alive := range []byte{0, 1} {
 		for neigh := byte(0); neigh <= 8; neigh++ {
@@ -112,6 +124,7 @@ func init() {
 	}
 }
 
+// next cell state for current alive state and number of neighbors
 func nextState(alive byte, neighbors byte) byte {
 	if alive == 1 && neighbors == 2 || neighbors == 3 {
 		return 1
@@ -156,6 +169,9 @@ func MakeBoard(rows, cols int) *Board {
 		done:  make(chan int, rows),
 	}
 
+	// start parallel workers:
+	// TODO: give more than one row per worker
+	// so that small boards run efficiently as well.
 	for i := 0; i < runtime.NumCPU(); i++ {
 		go func() {
 			colsum := make([]byte, roundCols)
@@ -177,10 +193,4 @@ func makeMatrix(rows, cols int) [][]byte {
 		c[i] = all[i*cols : (i+1)*cols]
 	}
 	return c
-}
-
-func zero(ps []byte) {
-	for i := range ps {
-		ps[i] = 0
-	}
 }
