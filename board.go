@@ -55,6 +55,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 
 	dst := b.temp[r]
 	maxNib := dst.nibs() - 1
+	maxWord := dst.words() - 1
 
 	// towards counting neighbors:
 	// vertical sums over 3 rows
@@ -66,16 +67,23 @@ func (b *Board) advRow(r int, cs Nibs) {
 	nextCS = cs.get(0) // prime the pipeline
 
 	c := 0
-	for ; c <= maxNib-NibsPerWord; c++ {
-		alive := currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-		nextCS = cs.get(c + 1)
+	for w := 0; w < maxWord; w++ {
+		for n := 0; n < NibsPerWord; n++ {
 
-		neigh := prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
+			alive := currRow.get(c)
+			prevCS = currCS
+			currCS = nextCS
+			nextCS = cs.get(c + 1)
+
+			neigh := prevCS + currCS + nextCS
+
+			dst.set(c, nextLUT[(alive<<3)|neigh])
+			c++
+		}
 	}
 
+	// last word may be truncated
+	// TODO: more accurately
 	for ; c <= maxNib; c++ {
 		alive := currRow.get(c)
 		prevCS = currCS
