@@ -86,13 +86,71 @@ func (b *Board) advRow(r int, cs []byte) {
 	nextCS = cs[0] // prime the pipeline
 
 	c := 0
-	for c = 0; c < max; c++ {
+	maxNice := (max / 8) * 8
+	for c = 0; c < maxNice; {
 		alive := currRow[c]
 		prevCS = currCS
 		currCS = nextCS
 		nextCS = cs[c+1]
 		neigh := prevCS + currCS + nextCS
 		dst[c] = nextLUT[(alive<<4)|neigh]
+		c++
+
+		alive = currRow[c]
+		prevCS = currCS
+		currCS = nextCS
+		nextCS = cs[c+1]
+		neigh = prevCS + currCS + nextCS
+		dst[c] = nextLUT[(alive<<4)|neigh]
+		c++
+
+		alive = currRow[c]
+		prevCS = currCS
+		currCS = nextCS
+		nextCS = cs[c+1]
+		neigh = prevCS + currCS + nextCS
+		dst[c] = nextLUT[(alive<<4)|neigh]
+		c++
+
+		alive = currRow[c]
+		prevCS = currCS
+		currCS = nextCS
+		nextCS = cs[c+1]
+		neigh = prevCS + currCS + nextCS
+		dst[c] = nextLUT[(alive<<4)|neigh]
+		c++
+
+		alive = currRow[c]
+		prevCS = currCS
+		currCS = nextCS
+		nextCS = cs[c+1]
+		neigh = prevCS + currCS + nextCS
+		dst[c] = nextLUT[(alive<<4)|neigh]
+		c++
+
+		alive = currRow[c]
+		prevCS = currCS
+		currCS = nextCS
+		nextCS = cs[c+1]
+		neigh = prevCS + currCS + nextCS
+		dst[c] = nextLUT[(alive<<4)|neigh]
+		c++
+
+		alive = currRow[c]
+		prevCS = currCS
+		currCS = nextCS
+		nextCS = cs[c+1]
+		neigh = prevCS + currCS + nextCS
+		dst[c] = nextLUT[(alive<<4)|neigh]
+		c++
+
+		alive = currRow[c]
+		prevCS = currCS
+		currCS = nextCS
+		nextCS = cs[c+1]
+		neigh = prevCS + currCS + nextCS
+		dst[c] = nextLUT[(alive<<4)|neigh]
+		c++
 	}
 
 	// remaining columns near edge
