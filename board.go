@@ -82,11 +82,10 @@ func (b *Board) advRow(r int, cs []byte) {
 
 	// pipeline with per-column sums left of cell, at cell, right of cell
 	var prevCS, currCS, nextCS byte
-	// prime the pipeline
-	nextCS = cs[0]
+	nextCS = cs[0] // prime the pipeline
 
-	for c := 0; c < cols-1; c++ {
-
+	c := 0
+	for c = 0; c < cols-1; c++ {
 		alive := currRow[c]
 		prevCS = currCS
 		currCS = nextCS
@@ -95,13 +94,12 @@ func (b *Board) advRow(r int, cs []byte) {
 		dst[c] = nextLUT[(alive<<4)|neigh]
 	}
 
-	// last column is special
-	c := cols - 1
+	// last column is special, no next
 	alive := currRow[c]
 	prevCS = currCS
 	currCS = nextCS
 	nextCS = 0
-	neigh := prevCS + currCS
+	neigh := prevCS + currCS + nextCS
 	dst[c] = nextLUT[(alive<<4)|neigh]
 }
 
