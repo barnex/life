@@ -75,6 +75,7 @@ func colSum(dst, a, b, c []byte) {
 func (b *Board) advRow(r int, cs []byte) {
 
 	cols := b.Cols()
+	max := cols - 1
 	dst := b.temp[r]
 
 	prevRow, currRow, nextRow := b.adjacentRows(r)
@@ -85,7 +86,7 @@ func (b *Board) advRow(r int, cs []byte) {
 	nextCS = cs[0] // prime the pipeline
 
 	c := 0
-	for c = 0; c < cols-1; c++ {
+	for c = 0; c < max; c++ {
 		alive := currRow[c]
 		prevCS = currCS
 		currCS = nextCS
@@ -94,13 +95,20 @@ func (b *Board) advRow(r int, cs []byte) {
 		dst[c] = nextLUT[(alive<<4)|neigh]
 	}
 
-	// last column is special, no next
-	alive := currRow[c]
-	prevCS = currCS
-	currCS = nextCS
-	nextCS = 0
-	neigh := prevCS + currCS + nextCS
-	dst[c] = nextLUT[(alive<<4)|neigh]
+	// remaining columns near edge
+	for ; c <= max; c++ {
+		alive := currRow[c]
+		prevCS = currCS
+		currCS = nextCS
+
+		nextCS = 0
+		if c != max {
+			nextCS = cs[c+1]
+		}
+
+		neigh := prevCS + currCS + nextCS
+		dst[c] = nextLUT[(alive<<4)|neigh]
+	}
 }
 
 // get rows adjacent to r, without going out of bounds.
