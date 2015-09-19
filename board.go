@@ -56,17 +56,17 @@ func as64(bytes []byte) []uint64 {
 	return (*((*[1 << 31]uint64)(unsafe.Pointer(&bytes[0]))))[:len(bytes)/8]
 }
 
-// partial sums towards number of neighbors:
-// dst = up + me + down, per column
-// Arrays must have multiple of 8 size so we can add SIMD-style
-func colSum(dst, up, me, down []byte) {
+// dst[i] = a[i] + b[i] + c[i].
+// Arrays must have multiple of 8 size,
+// we do 8 additions in one instruction
+func colSum(dst, a, b, c []byte) {
 	dst64 := as64(dst)
-	up64 := as64(up)
-	me64 := as64(me)
-	down64 := as64(down)
+	a64 := as64(a)
+	b64 := as64(b)
+	c64 := as64(c)
 
 	for i := range dst64 {
-		dst64[i] = up64[i] + me64[i] + down64[i]
+		dst64[i] = a64[i] + b64[i] + c64[i]
 	}
 }
 
@@ -75,27 +75,27 @@ func colSum(dst, up, me, down []byte) {
 func (b *Board) advRow(r int, cs []byte) {
 
 	// get adjacent rows without going out of bounds
-	up := b.empty
+	prevRow := b.empty
 	if r > 0 {
-		up = b.cells[r-1]
+		prevRow = b.cells[r-1]
 	}
-	me := b.cells[r]
-	down := b.empty
+	currRow := b.cells[r]
+	nextRow := b.empty
 	if r < b.rows-1 {
-		down = b.cells[r+1]
+		nextRow = b.cells[r+1]
 	}
 
 	cols := b.Cols()
 	result := b.temp[r]
 
-	colSum(cs, up, me, down)
+	colSum(cs, prevRow, currRow, nextRow)
 
 	// partial column sums left, centered and right of current cell
 	var prevCS, currCS, nextCS byte
 
 	// first column is special
 	c := 0
-	alive := me[c]
+	alive := currRow[c]
 
 	prevCS = 0
 	currCS = cs[c]
@@ -106,7 +106,7 @@ func (b *Board) advRow(r int, cs []byte) {
 
 	// bulk columns don't have borders
 	for c := 1; c < cols-1; c++ {
-		alive = me[c]
+		alive = currRow[c]
 
 		prevCS = currCS
 		currCS = nextCS
@@ -118,7 +118,7 @@ func (b *Board) advRow(r int, cs []byte) {
 
 	// last column is special
 	c = cols - 1
-	alive = me[c]
+	alive = currRow[c]
 	neigh = cs[c-1] + cs[c]
 	result[c] = nextLUT[(alive<<4)|neigh]
 }
