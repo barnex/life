@@ -13,9 +13,7 @@ const (
 )
 
 // Array of nibbles (4-bit words), packed in 64-bit ints
-type Nibs struct {
-	b []uint64
-}
+type Nibs []uint64
 
 func (n Nibs) String() string {
 	var buf bytes.Buffer
@@ -32,14 +30,14 @@ func (n Nibs) get(i int) uint64 {
 	w := i / NibsPerWord
 	bitpos := uint(i % NibsPerWord)
 
-	word := n.b[w]
+	word := n[w]
 	return getNib(word, bitpos)
 }
 
 func (n Nibs) set(i int, v uint64) {
 	w := i / NibsPerWord
 	nibpos := uint(i % NibsPerWord)
-	n.b[w] = setNib(n.b[w], nibpos, uint64(v))
+	n[w] = setNib(n[w], nibpos, uint64(v))
 }
 
 func getNib(w uint64, nibpos uint) uint64 {
@@ -58,7 +56,7 @@ func setNib(w uint64, nibpos uint, v uint64) uint64 {
 }
 
 func (n Nibs) words() int {
-	return len(n.b)
+	return len(n)
 }
 
 func (n Nibs) nibs() int {
@@ -69,5 +67,5 @@ func makeNibs(n int) Nibs {
 	if n%NibsPerWord != 0 {
 		panic(n)
 	}
-	return Nibs{make([]uint64, n/NibsPerWord)}
+	return make(Nibs, n/NibsPerWord)
 }
