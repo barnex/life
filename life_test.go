@@ -10,18 +10,6 @@ const (
 	O = false
 )
 
-//func ExampleAs64() {
-//	arr := []byte{
-//		1, 0, 0, 0, 0, 0, 0, 0,
-//		0, 1, 0, 0, 0, 0, 0, 0,
-//		0, 0, 0, 0, 0, 0, 0, 1,
-//	}
-//	fmt.Println(as64(arr))
-//
-//	//Output:
-//	// [1 256 72057594037927936]
-//}
-
 func ExampleColSum() {
 	rows, cols := 6, 16
 	b := MakeBoard(rows, cols)

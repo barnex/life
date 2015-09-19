@@ -28,26 +28,18 @@ func (n Nibs) String() string {
 	return buf.String()
 }
 
-func (n Nibs) get(i int) byte {
+func (n Nibs) get(i int) uint64 {
 	w := i / NibsPerWord
 	bitpos := uint(i % NibsPerWord)
 
 	word := n.b[w]
-	return safeByte(getNib(word, bitpos))
+	return getNib(word, bitpos)
 }
 
-func (n Nibs) set(i int, v byte) {
+func (n Nibs) set(i int, v uint64) {
 	w := i / NibsPerWord
 	nibpos := uint(i % NibsPerWord)
 	n.b[w] = setNib(n.b[w], nibpos, uint64(v))
-}
-
-func safeByte(x uint64) byte {
-	b := byte(x)
-	if uint64(b) != x {
-		panic(x)
-	}
-	return b
 }
 
 func getNib(w uint64, nibpos uint) uint64 {

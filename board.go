@@ -42,20 +42,10 @@ func (b *Board) stepParallel() {
 	}
 }
 
-// view byte array as 64-bit int array,
-// so we can add 8 pairs of bytes in one instruction.
-//func as64(bytes []byte) []uint64 {
-//	if len(bytes)%8 != 0 {
-//		panic("as64")
-//	}
-//	return (*((*[1 << 31]uint64)(unsafe.Pointer(&bytes[0]))))[:len(bytes)/8]
-//}
-
 // dst[i] = a[i] + b[i] + c[i].
 // Arrays must have multiple of 8 size,
 // we do 8 additions in one instruction
 func colSum(dst, a, b, c Nibs) {
-
 	for i := 0; i < dst.nibs(); i++ {
 		dst.set(i, a.get(i)+b.get(i)+c.get(i))
 	}
@@ -73,7 +63,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 	colSum(cs, prevRow, currRow, nextRow)
 
 	// pipeline with per-column sums left of cell, at cell, right of cell
-	var prevCS, currCS, nextCS byte
+	var prevCS, currCS, nextCS uint64
 	nextCS = cs.get(0) // prime the pipeline
 
 	//currPack := as64(currRow)
@@ -182,12 +172,12 @@ func (b *Board) adjacentRows(r int) (prev, curr, next Nibs) {
 
 // look-up table for next state,
 // indexed by (alive<<4)|(neigh+alive)
-var nextLUT [32]byte
+var nextLUT [32]uint64
 
 // set-up nextLUT
 func init() {
-	for _, alive := range []byte{0, 1} {
-		for neigh := byte(0); neigh <= 8; neigh++ {
+	for _, alive := range []uint64{0, 1} {
+		for neigh := uint64(0); neigh <= 8; neigh++ {
 			idx := (alive << 4) | neigh
 			nextLUT[idx] = nextState(alive, neigh-alive) // self is included in neigh
 		}
@@ -195,7 +185,7 @@ func init() {
 }
 
 // next cell state for current alive state and number of neighbors
-func nextState(alive byte, neighbors byte) byte {
+func nextState(alive uint64, neighbors uint64) uint64 {
 	if alive == 1 && neighbors == 2 || neighbors == 3 {
 		return 1
 	}
@@ -210,7 +200,7 @@ func (b *Board) Set(r, c int, v bool) {
 	}
 }
 
-func (b *Board) get(r, c int) byte {
+func (b *Board) get(r, c int) uint64 {
 	if r < 0 || c < 0 || r >= b.Rows() || c >= b.Cols() {
 		return 0
 	}

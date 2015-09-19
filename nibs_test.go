@@ -5,7 +5,7 @@ import "fmt"
 func ExampleNibs_set() {
 	n := makeNibs(32)
 	for i := 0; i < n.nibs(); i++ {
-		n.set(i, byte(i%10))
+		n.set(i, uint64(i%10))
 	}
 	fmt.Println(n)
 
