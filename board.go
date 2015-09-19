@@ -74,16 +74,7 @@ func colSum(dst, a, b, c []byte) {
 // freely using cs as a buffer.
 func (b *Board) advRow(r int, cs []byte) {
 
-	// get adjacent rows without going out of bounds
-	prevRow := b.empty
-	if r > 0 {
-		prevRow = b.cells[r-1]
-	}
-	currRow := b.cells[r]
-	nextRow := b.empty
-	if r < b.rows-1 {
-		nextRow = b.cells[r+1]
-	}
+	prevRow, currRow, nextRow := b.adjacentRows(r)
 
 	cols := b.Cols()
 	result := b.temp[r]
@@ -121,6 +112,22 @@ func (b *Board) advRow(r int, cs []byte) {
 	alive = currRow[c]
 	neigh = cs[c-1] + cs[c]
 	result[c] = nextLUT[(alive<<4)|neigh]
+}
+
+// get rows adjacent to r, without going out of bounds.
+// returns row r-1, r, r+1, replacing out-of-bound rows
+// by a row of zeros.
+func (b *Board) adjacentRows(r int) (prev, curr, next []byte) {
+	prev = b.empty
+	if r > 0 {
+		prev = b.cells[r-1]
+	}
+	curr = b.cells[r]
+	next = b.empty
+	if r < b.rows-1 {
+		next = b.cells[r+1]
+	}
+	return prev, curr, next
 }
 
 // look-up table for next state,
