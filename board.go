@@ -74,44 +74,43 @@ func colSum(dst, a, b, c []byte) {
 // freely using cs as a buffer.
 func (b *Board) advRow(r int, cs []byte) {
 
-	prevRow, currRow, nextRow := b.adjacentRows(r)
-
 	cols := b.Cols()
-	result := b.temp[r]
+	dst := b.temp[r]
 
+	prevRow, currRow, nextRow := b.adjacentRows(r)
 	colSum(cs, prevRow, currRow, nextRow)
 
-	// partial column sums left, centered and right of current cell
+	// pipeline with per-column sums left of cell, at cell, right of cell
 	var prevCS, currCS, nextCS byte
 
 	// first column is special
 	c := 0
 	alive := currRow[c]
-
 	prevCS = 0
 	currCS = cs[c]
 	nextCS = cs[c+1]
-
 	neigh := prevCS + currCS + nextCS
-	result[c] = nextLUT[(alive<<4)|neigh]
+	dst[c] = nextLUT[(alive<<4)|neigh]
 
 	// bulk columns don't have borders
 	for c := 1; c < cols-1; c++ {
-		alive = currRow[c]
 
+		alive = currRow[c]
 		prevCS = currCS
 		currCS = nextCS
 		nextCS = cs[c+1]
-
 		neigh = prevCS + currCS + nextCS
-		result[c] = nextLUT[(alive<<4)|neigh]
+		dst[c] = nextLUT[(alive<<4)|neigh]
 	}
 
 	// last column is special
 	c = cols - 1
 	alive = currRow[c]
-	neigh = cs[c-1] + cs[c]
-	result[c] = nextLUT[(alive<<4)|neigh]
+	prevCS = currCS
+	currCS = nextCS
+	nextCS = 0
+	neigh = prevCS + currCS
+	dst[c] = nextLUT[(alive<<4)|neigh]
 }
 
 // get rows adjacent to r, without going out of bounds.
