@@ -53,9 +53,8 @@ func colSum(dst, a, b, c Nibs) {
 // freely using cs as a buffer.
 func (b *Board) advRow(r int, cs Nibs) {
 
-	cols := b.Cols()
-	max := cols - 1
 	dst := b.temp[r]
+	maxNib := dst.nibs() - 1
 
 	// towards counting neighbors:
 	// vertical sums over 3 rows
@@ -66,13 +65,24 @@ func (b *Board) advRow(r int, cs Nibs) {
 	var prevCS, currCS, nextCS uint64
 	nextCS = cs.get(0) // prime the pipeline
 
-	for c := 0; c <= max; c++ {
+	c := 0
+	for ; c <= maxNib-NibsPerWord; c++ {
+		alive := currRow.get(c)
+		prevCS = currCS
+		currCS = nextCS
+		nextCS = cs.get(c + 1)
+
+		neigh := prevCS + currCS + nextCS
+		dst.set(c, nextLUT[(alive<<3)|neigh])
+	}
+
+	for ; c <= maxNib; c++ {
 		alive := currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
 
 		nextCS = 0
-		if c != max {
+		if c < b.cols-1 {
 			nextCS = cs.get(c + 1)
 		}
 
