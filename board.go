@@ -1,17 +1,20 @@
 package life
 
-import (
-	"runtime"
-	"unsafe"
-)
+import "runtime"
+
+type Nibs []byte
+
+func (n Nibs) get(i int) byte    { return n[i] }
+func (n Nibs) set(i int, v byte) { n[i] = v }
+func makeNibs(n int) Nibs        { return Nibs(make([]byte, n)) }
 
 type Board struct {
 	rows, cols int
-	cells      [][]byte // current cells
-	temp       [][]byte // buffer for next-gen cells
-	empty      []byte   // empty cell row used at borders
+	cells      []Nibs // current cells
+	temp       []Nibs // buffer for next-gen cells
+	empty      Nibs   // empty cell row used at borders
 	work, done chan int
-	serialCS   []byte // temp hack for serial tuning
+	serialCS   Nibs // temp hack for serial tuning
 }
 
 // Advance the state given number of steps
@@ -49,30 +52,26 @@ func (b *Board) stepParallel() {
 
 // view byte array as 64-bit int array,
 // so we can add 8 pairs of bytes in one instruction.
-func as64(bytes []byte) []uint64 {
-	if len(bytes)%8 != 0 {
-		panic("as64")
-	}
-	return (*((*[1 << 31]uint64)(unsafe.Pointer(&bytes[0]))))[:len(bytes)/8]
-}
+//func as64(bytes []byte) []uint64 {
+//	if len(bytes)%8 != 0 {
+//		panic("as64")
+//	}
+//	return (*((*[1 << 31]uint64)(unsafe.Pointer(&bytes[0]))))[:len(bytes)/8]
+//}
 
 // dst[i] = a[i] + b[i] + c[i].
 // Arrays must have multiple of 8 size,
 // we do 8 additions in one instruction
-func colSum(dst, a, b, c []byte) {
-	dst64 := as64(dst)
-	a64 := as64(a)
-	b64 := as64(b)
-	c64 := as64(c)
+func colSum(dst, a, b, c Nibs) {
 
-	for i := range dst64 {
-		dst64[i] = a64[i] + b64[i] + c64[i]
+	for i := range dst {
+		dst[i] = a[i] + b[i] + c[i]
 	}
 }
 
 // advance row r to the next state,
 // freely using cs as a buffer.
-func (b *Board) advRow(r int, cs []byte) {
+func (b *Board) advRow(r int, cs Nibs) {
 
 	cols := b.Cols()
 	max := cols - 1
@@ -176,7 +175,7 @@ func (b *Board) advRow(r int, cs []byte) {
 // get rows adjacent to r, without going out of bounds.
 // returns row r-1, r, r+1, replacing out-of-bound rows
 // by a row of zeros.
-func (b *Board) adjacentRows(r int) (prev, curr, next []byte) {
+func (b *Board) adjacentRows(r int) (prev, curr, next Nibs) {
 	prev = b.empty
 	if r > 0 {
 		prev = b.cells[r-1]
@@ -243,10 +242,10 @@ func MakeBoard(rows, cols int) *Board {
 		cols:     cols,
 		cells:    makeMatrix(rows, roundCols),
 		temp:     makeMatrix(rows, roundCols),
-		empty:    make([]byte, roundCols),
+		empty:    makeNibs(roundCols),
 		work:     make(chan int, rows),
 		done:     make(chan int, rows),
-		serialCS: make([]byte, roundCols),
+		serialCS: makeNibs(roundCols),
 	}
 
 	// start parallel workers:
@@ -266,11 +265,11 @@ func MakeBoard(rows, cols int) *Board {
 	return b
 }
 
-func makeMatrix(rows, cols int) [][]byte {
-	all := make([]byte, rows*cols)
-	c := make([][]byte, rows)
+// TODO: contiguous!!
+func makeMatrix(rows, cols int) []Nibs {
+	c := make([]Nibs, rows)
 	for i := range c {
-		c[i] = all[i*cols : (i+1)*cols]
+		c[i] = makeNibs(cols)
 	}
 	return c
 }
