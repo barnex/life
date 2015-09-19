@@ -1,5 +1,10 @@
 package life
 
+import (
+	"bytes"
+	"fmt"
+)
+
 const (
 	NibBits     = 4
 	NibMask     = 0xF
@@ -9,6 +14,17 @@ const (
 
 type Nibs struct {
 	b []uint64
+}
+
+func (n Nibs) String() string {
+	var buf bytes.Buffer
+	for i := 0; i < n.nibs(); i++ {
+		if i != 0 && i%NibsPerWord == 0 {
+			fmt.Fprintf(&buf, " ")
+		}
+		fmt.Fprintf(&buf, "%x", n.get(i))
+	}
+	return buf.String()
 }
 
 func (n Nibs) get(i int) byte {
@@ -21,11 +37,8 @@ func (n Nibs) get(i int) byte {
 
 func (n Nibs) set(i int, v byte) {
 	w := i / NibsPerWord
-	bitpos := uint(i % NibsPerWord)
-
-	word := n.b[w]
-	setNib(word, bitpos, uint64(v))
-	n.b[w] = word
+	nibpos := uint(i % NibsPerWord)
+	n.b[w] = setNib(n.b[w], nibpos, uint64(v))
 }
 
 func safeByte(x uint64) byte {
@@ -51,8 +64,12 @@ func setNib(w uint64, nibpos uint, v uint64) uint64 {
 	return w
 }
 
-func (n Nibs) len() int {
+func (n Nibs) words() int {
 	return len(n.b)
+}
+
+func (n Nibs) nibs() int {
+	return n.words() * NibsPerWord
 }
 
 func makeNibs(n int) Nibs {
@@ -118,7 +135,7 @@ func (b *Board) stepParallel() {
 // we do 8 additions in one instruction
 func colSum(dst, a, b, c Nibs) {
 
-	for i := 0; i < dst.len(); i++ {
+	for i := 0; i < dst.nibs(); i++ {
 		dst.set(i, a.get(i)+b.get(i)+c.get(i))
 	}
 }

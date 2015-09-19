@@ -10,6 +10,22 @@ const (
 	O = false
 )
 
+func ExampleNibs_set() {
+	n := makeNibs(32)
+	for i := 0; i < n.nibs(); i++ {
+		n.set(i, byte(i%10))
+	}
+	fmt.Println(n)
+
+	//Output:
+	//0123456789012345 6789012345678901
+}
+
+func ExampleNibs_get() {
+	n := makeNibs(32)
+	n.get(0)
+}
+
 func ExampleGetNib() {
 	w := uint64(0xFEDCBA9876543210)
 	for i := uint(0); i < NibsPerWord; i++ {
@@ -74,7 +90,7 @@ func ExampleColSum() {
 	rs := makeNibs(cols)
 	for r := 1; r < rows-1; r++ {
 		colSum(rs, b.cells[r-1], b.cells[r], b.cells[r+1])
-		for c := 0; c < rs.len(); c++ {
+		for c := 0; c < rs.nibs(); c++ {
 			C := rs.get(c)
 			fmt.Print(C, ",")
 		}
