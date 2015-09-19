@@ -43,11 +43,9 @@ func (b *Board) stepParallel() {
 }
 
 // dst[i] = a[i] + b[i] + c[i].
-// Arrays must have multiple of 8 size,
-// we do 8 additions in one instruction
 func colSum(dst, a, b, c Nibs) {
-	for i := 0; i < dst.nibs(); i++ {
-		dst.set(i, a.get(i)+b.get(i)+c.get(i))
+	for i := range dst {
+		dst[i] = a[i] + b[i] + c[i]
 	}
 }
 
