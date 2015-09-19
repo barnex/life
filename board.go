@@ -57,6 +57,8 @@ func (b *Board) advRow(r int, cs Nibs) {
 	max := cols - 1
 	dst := b.temp[r]
 
+	// towards counting neighbors:
+	// vertical sums over 3 rows
 	prevRow, currRow, nextRow := b.adjacentRows(r)
 	colSum(cs, prevRow, currRow, nextRow)
 
@@ -64,80 +66,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 	var prevCS, currCS, nextCS uint64
 	nextCS = cs.get(0) // prime the pipeline
 
-	//currPack := as64(currRow)
-
-	c := 0
-	words := (max / 8)
-	for w := 0; w < words; w++ {
-
-		c = 8 * w
-		alive := currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-		nextCS = cs.get(c + 1)
-		neigh := prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
-		c++
-
-		alive = currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-		nextCS = cs.get(c + 1)
-		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
-		c++
-
-		alive = currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-		nextCS = cs.get(c + 1)
-		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
-		c++
-
-		alive = currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-		nextCS = cs.get(c + 1)
-		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
-		c++
-
-		alive = currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-		nextCS = cs.get(c + 1)
-		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
-		c++
-
-		alive = currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-		nextCS = cs.get(c + 1)
-		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
-		c++
-
-		alive = currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-		nextCS = cs.get(c + 1)
-		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
-		c++
-
-		alive = currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-		nextCS = cs.get(c + 1)
-		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
-		c++
-	}
-
-	// remaining columns near edge
-	for ; c <= max; c++ {
+	for c := 0; c <= max; c++ {
 		alive := currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
