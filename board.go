@@ -11,6 +11,7 @@ type Board struct {
 	temp       [][]byte // buffer for next-gen cells
 	empty      []byte   // empty cell row used at borders
 	work, done chan int
+	serialCS   []byte // temp hack for serial tuning
 }
 
 // Advance the state given number of steps
@@ -22,6 +23,20 @@ func (b *Board) Advance(steps int) {
 
 // advance one step
 func (b *Board) advance() {
+	//b.stepParallel()
+	b.stepSerial()
+
+	// swap: temp becomes current cells
+	b.cells, b.temp = b.temp, b.cells
+}
+
+func (b *Board) stepSerial() {
+	for r := range b.cells {
+		b.advRow(r, b.serialCS)
+	}
+}
+
+func (b *Board) stepParallel() {
 	// do rows in parallel
 	for r := 0; r < b.rows; r++ {
 		b.work <- r
@@ -30,8 +45,6 @@ func (b *Board) advance() {
 	for r := 0; r < b.rows; r++ {
 		<-b.done
 	}
-	// swap: temp becomes current cells
-	b.cells, b.temp = b.temp, b.cells
 }
 
 // view byte array as 64-bit int array,
@@ -160,13 +173,14 @@ func (b *Board) Cols() int {
 func MakeBoard(rows, cols int) *Board {
 	roundCols := ((cols-1)/8 + 1) * 8 // round up to multiple of 8 so it fits 64bit int
 	b := &Board{
-		rows:  rows,
-		cols:  cols,
-		cells: makeMatrix(rows, roundCols),
-		temp:  makeMatrix(rows, roundCols),
-		empty: make([]byte, roundCols),
-		work:  make(chan int, rows),
-		done:  make(chan int, rows),
+		rows:     rows,
+		cols:     cols,
+		cells:    makeMatrix(rows, roundCols),
+		temp:     makeMatrix(rows, roundCols),
+		empty:    make([]byte, roundCols),
+		work:     make(chan int, rows),
+		done:     make(chan int, rows),
+		serialCS: make([]byte, roundCols),
 	}
 
 	// start parallel workers:
