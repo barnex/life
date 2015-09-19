@@ -35,11 +35,12 @@ func ExampleColSum() {
 		{O, O, O, O, O},
 	})
 
-	rs := make([]byte, cols)
+	rs := makeNibs(cols)
 	for r := 1; r < rows-1; r++ {
 		colSum(rs, b.cells[r-1], b.cells[r], b.cells[r+1])
-		for _, c := range rs {
-			fmt.Print(c, ",")
+		for c := 0; c < rs.len(); c++ {
+			C := rs.get(c)
+			fmt.Print(C, ",")
 		}
 		fmt.Println()
 	}

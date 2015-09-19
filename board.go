@@ -1,12 +1,11 @@
 package life
 
-import "runtime"
+type Nibs struct{ b []byte }
 
-type Nibs []byte
-
-func (n Nibs) get(i int) byte    { return n[i] }
-func (n Nibs) set(i int, v byte) { n[i] = v }
-func makeNibs(n int) Nibs        { return Nibs(make([]byte, n)) }
+func (n Nibs) get(i int) byte    { return n.b[i] }
+func (n Nibs) set(i int, v byte) { n.b[i] = v }
+func (n Nibs) len() int          { return len(n.b) }
+func makeNibs(n int) Nibs        { return Nibs{make([]byte, n)} }
 
 type Board struct {
 	rows, cols int
@@ -64,8 +63,8 @@ func (b *Board) stepParallel() {
 // we do 8 additions in one instruction
 func colSum(dst, a, b, c Nibs) {
 
-	for i := range dst {
-		dst[i] = a[i] + b[i] + c[i]
+	for i := 0; i < dst.len(); i++ {
+		dst.set(i, a.get(i)+b.get(i)+c.get(i))
 	}
 }
 
@@ -82,7 +81,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 
 	// pipeline with per-column sums left of cell, at cell, right of cell
 	var prevCS, currCS, nextCS byte
-	nextCS = cs[0] // prime the pipeline
+	nextCS = cs.get(0) // prime the pipeline
 
 	//currPack := as64(currRow)
 
@@ -91,84 +90,84 @@ func (b *Board) advRow(r int, cs Nibs) {
 	for w := 0; w < words; w++ {
 
 		c = 8 * w
-		alive := currRow[c]
+		alive := currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
-		nextCS = cs[c+1]
+		nextCS = cs.get(c + 1)
 		neigh := prevCS + currCS + nextCS
-		dst[c] = nextLUT[(alive<<4)|neigh]
+		dst.set(c, nextLUT[(alive<<4)|neigh])
 		c++
 
-		alive = currRow[c]
+		alive = currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
-		nextCS = cs[c+1]
+		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst[c] = nextLUT[(alive<<4)|neigh]
+		dst.set(c, nextLUT[(alive<<4)|neigh])
 		c++
 
-		alive = currRow[c]
+		alive = currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
-		nextCS = cs[c+1]
+		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst[c] = nextLUT[(alive<<4)|neigh]
+		dst.set(c, nextLUT[(alive<<4)|neigh])
 		c++
 
-		alive = currRow[c]
+		alive = currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
-		nextCS = cs[c+1]
+		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst[c] = nextLUT[(alive<<4)|neigh]
+		dst.set(c, nextLUT[(alive<<4)|neigh])
 		c++
 
-		alive = currRow[c]
+		alive = currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
-		nextCS = cs[c+1]
+		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst[c] = nextLUT[(alive<<4)|neigh]
+		dst.set(c, nextLUT[(alive<<4)|neigh])
 		c++
 
-		alive = currRow[c]
+		alive = currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
-		nextCS = cs[c+1]
+		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst[c] = nextLUT[(alive<<4)|neigh]
+		dst.set(c, nextLUT[(alive<<4)|neigh])
 		c++
 
-		alive = currRow[c]
+		alive = currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
-		nextCS = cs[c+1]
+		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst[c] = nextLUT[(alive<<4)|neigh]
+		dst.set(c, nextLUT[(alive<<4)|neigh])
 		c++
 
-		alive = currRow[c]
+		alive = currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
-		nextCS = cs[c+1]
+		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst[c] = nextLUT[(alive<<4)|neigh]
+		dst.set(c, nextLUT[(alive<<4)|neigh])
 		c++
 	}
 
 	// remaining columns near edge
 	for ; c <= max; c++ {
-		alive := currRow[c]
+		alive := currRow.get(c)
 		prevCS = currCS
 		currCS = nextCS
 
 		nextCS = 0
 		if c != max {
-			nextCS = cs[c+1]
+			nextCS = cs.get(c + 1)
 		}
 
 		neigh := prevCS + currCS + nextCS
-		dst[c] = nextLUT[(alive<<4)|neigh]
+		dst.set(c, nextLUT[(alive<<4)|neigh])
 	}
 }
 
@@ -212,9 +211,9 @@ func nextState(alive byte, neighbors byte) byte {
 
 func (b *Board) Set(r, c int, v bool) {
 	if v {
-		b.cells[r][c] = 1
+		b.cells[r].set(c, 1)
 	} else {
-		b.cells[r][c] = 0
+		b.cells[r].set(c, 0)
 	}
 }
 
@@ -222,7 +221,7 @@ func (b *Board) get(r, c int) byte {
 	if r < 0 || c < 0 || r >= b.Rows() || c >= b.Cols() {
 		return 0
 	}
-	return b.cells[r][c]
+	return b.cells[r].get(c)
 }
 func (b *Board) Get(r, c int) bool {
 	return b.get(r, c) == 1
@@ -251,16 +250,16 @@ func MakeBoard(rows, cols int) *Board {
 	// start parallel workers:
 	// TODO: give more than one row per worker
 	// so that small boards run efficiently as well.
-	for i := 0; i < runtime.NumCPU(); i++ {
-		go func() {
-			colsum := make([]byte, roundCols)
-			for {
-				r := <-b.work
-				b.advRow(r, colsum)
-				b.done <- 1
-			}
-		}()
-	}
+	//for i := 0; i < runtime.NumCPU(); i++ {
+	//	go func() {
+	//		colsum := make([]byte, roundCols)
+	//		for {
+	//			r := <-b.work
+	//			b.advRow(r, colsum)
+	//			b.done <- 1
+	//		}
+	//	}()
+	//}
 
 	return b
 }
