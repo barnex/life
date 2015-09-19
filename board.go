@@ -85,9 +85,13 @@ func (b *Board) advRow(r int, cs []byte) {
 	var prevCS, currCS, nextCS byte
 	nextCS = cs[0] // prime the pipeline
 
+	//currPack := as64(currRow)
+
 	c := 0
-	maxNice := (max / 8) * 8
-	for c = 0; c < maxNice; {
+	words := (max / 8)
+	for w := 0; w < words; w++ {
+
+		c = 8 * w
 		alive := currRow[c]
 		prevCS = currCS
 		currCS = nextCS
