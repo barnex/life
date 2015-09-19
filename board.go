@@ -76,7 +76,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 		currCS = nextCS
 		nextCS = cs.get(c + 1)
 		neigh := prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<4)|neigh])
+		dst.set(c, nextLUT[(alive<<3)|neigh])
 		c++
 
 		alive = currRow.get(c)
@@ -84,7 +84,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 		currCS = nextCS
 		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<4)|neigh])
+		dst.set(c, nextLUT[(alive<<3)|neigh])
 		c++
 
 		alive = currRow.get(c)
@@ -92,7 +92,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 		currCS = nextCS
 		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<4)|neigh])
+		dst.set(c, nextLUT[(alive<<3)|neigh])
 		c++
 
 		alive = currRow.get(c)
@@ -100,7 +100,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 		currCS = nextCS
 		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<4)|neigh])
+		dst.set(c, nextLUT[(alive<<3)|neigh])
 		c++
 
 		alive = currRow.get(c)
@@ -108,7 +108,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 		currCS = nextCS
 		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<4)|neigh])
+		dst.set(c, nextLUT[(alive<<3)|neigh])
 		c++
 
 		alive = currRow.get(c)
@@ -116,7 +116,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 		currCS = nextCS
 		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<4)|neigh])
+		dst.set(c, nextLUT[(alive<<3)|neigh])
 		c++
 
 		alive = currRow.get(c)
@@ -124,7 +124,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 		currCS = nextCS
 		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<4)|neigh])
+		dst.set(c, nextLUT[(alive<<3)|neigh])
 		c++
 
 		alive = currRow.get(c)
@@ -132,7 +132,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 		currCS = nextCS
 		nextCS = cs.get(c + 1)
 		neigh = prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<4)|neigh])
+		dst.set(c, nextLUT[(alive<<3)|neigh])
 		c++
 	}
 
@@ -148,7 +148,7 @@ func (b *Board) advRow(r int, cs Nibs) {
 		}
 
 		neigh := prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<4)|neigh])
+		dst.set(c, nextLUT[(alive<<3)|neigh])
 	}
 }
 
@@ -169,14 +169,14 @@ func (b *Board) adjacentRows(r int) (prev, curr, next Nibs) {
 }
 
 // look-up table for next state,
-// indexed by (alive<<4)|(neigh+alive)
-var nextLUT [32]uint64
+// indexed by (alive<<3)|(neigh+alive)
+var nextLUT [16]uint64
 
 // set-up nextLUT
 func init() {
 	for _, alive := range []uint64{0, 1} {
 		for neigh := uint64(0); neigh <= 8; neigh++ {
-			idx := (alive << 4) | neigh
+			idx := (alive << 3) | neigh
 			nextLUT[idx] = nextState(alive, neigh-alive) // self is included in neigh
 		}
 	}
