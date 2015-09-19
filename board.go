@@ -228,7 +228,7 @@ func (b *Board) Cols() int {
 }
 
 func MakeBoard(rows, cols int) *Board {
-	roundCols := ((cols-1)/8 + 1) * 8 // round up to multiple of 8 so it fits 64bit int
+	roundCols := ((cols-1)/NibsPerWord + 1) * NibsPerWord // round up to multiple of 8 so it fits 64bit int
 	b := &Board{
 		rows:     rows,
 		cols:     cols,
