@@ -1,15 +1,54 @@
 package life
 
+const (
+	NibBits     = 4
+	NibMask     = 0xF
+	WordBits    = 64
+	NibsPerWord = WordBits / NibBits
+)
+
 type Nibs struct {
-	b []byte
+	b []uint64
 }
 
 func (n Nibs) get(i int) byte {
-	return n.b[i]
+	w := i / NibsPerWord
+	bitpos := uint(i % NibsPerWord)
+
+	word := n.b[w]
+	return safeByte(getNib(word, bitpos))
 }
 
 func (n Nibs) set(i int, v byte) {
-	n.b[i] = v
+	w := i / NibsPerWord
+	bitpos := uint(i % NibsPerWord)
+
+	word := n.b[w]
+	setNib(word, bitpos, uint64(v))
+	n.b[w] = word
+}
+
+func safeByte(x uint64) byte {
+	b := byte(x)
+	if uint64(b) != x {
+		panic(x)
+	}
+	return b
+}
+
+func getNib(w uint64, nibpos uint) uint64 {
+	sh := nibpos * NibBits
+	return (w >> sh) & NibMask
+}
+
+func setNib(w uint64, nibpos uint, v uint64) uint64 {
+	if v > NibMask {
+		panic(v)
+	}
+	sh := nibpos * NibBits
+	w &^= (NibMask << sh)
+	w |= (v << sh)
+	return w
 }
 
 func (n Nibs) len() int {
@@ -17,10 +56,10 @@ func (n Nibs) len() int {
 }
 
 func makeNibs(n int) Nibs {
-	if n%8 != 0 {
+	if n%NibsPerWord != 0 {
 		panic(n)
 	}
-	return Nibs{make([]byte, n)}
+	return Nibs{make([]uint64, n/NibsPerWord)}
 }
 
 type Board struct {

@@ -10,6 +10,16 @@ const (
 	O = false
 )
 
+func ExampleGetNib() {
+	w := uint64(0xFEDCBA9876543210)
+	for i := uint(0); i < NibsPerWord; i++ {
+		fmt.Printf("%x ", getNib(w, i))
+	}
+
+	// Output:
+	//0 1 2 3 4 5 6 7 8 9 a b c d e f
+}
+
 //func ExampleAs64() {
 //	arr := []byte{
 //		1, 0, 0, 0, 0, 0, 0, 0,
