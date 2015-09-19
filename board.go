@@ -1,11 +1,27 @@
 package life
 
-type Nibs struct{ b []byte }
+type Nibs struct {
+	b []byte
+}
 
-func (n Nibs) get(i int) byte    { return n.b[i] }
-func (n Nibs) set(i int, v byte) { n.b[i] = v }
-func (n Nibs) len() int          { return len(n.b) }
-func makeNibs(n int) Nibs        { return Nibs{make([]byte, n)} }
+func (n Nibs) get(i int) byte {
+	return n.b[i]
+}
+
+func (n Nibs) set(i int, v byte) {
+	n.b[i] = v
+}
+
+func (n Nibs) len() int {
+	return len(n.b)
+}
+
+func makeNibs(n int) Nibs {
+	if n%8 != 0 {
+		panic(n)
+	}
+	return Nibs{make([]byte, n)}
+}
 
 type Board struct {
 	rows, cols int
