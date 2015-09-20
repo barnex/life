@@ -101,12 +101,17 @@ func (b *Board) advRow(r int, buf1, buf2 Nibs) {
 		ngbr := neigh[w]
 		keys := ngbr | (alive << 3)
 
+		var out uint64
 		for n := uint(0); n < NibsPerWord; n++ {
+
 			idx := keys & NibMask
-			dst.set(c, nextLUT[idx])
+			next := nextLUT[idx]
+			out = setNib(out, n, next)
+
 			keys >>= NibBits
 			c++
 		}
+		dst[w] = out
 
 	}
 
