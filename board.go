@@ -94,7 +94,6 @@ func (b *Board) advRow(r int, buf1, buf2 Nibs) {
 
 	b.countNeigh(neigh, cs, r)
 
-	c := 0
 	for w := 0; w < dst.words(); w++ {
 
 		alive := row[w]
@@ -110,7 +109,6 @@ func (b *Board) advRow(r int, buf1, buf2 Nibs) {
 			next := LUT2[idx]
 			out |= next << (8 * n)
 			keys >>= 8
-			c++
 		}
 		dst[w] = out
 
