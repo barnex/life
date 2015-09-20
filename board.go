@@ -66,7 +66,7 @@ func (b *Board) countNeigh(dst, cs Nibs, r int) {
 		next = cs[i+1]
 
 		shr := (curr << NibBits) | (prev >> (WordBits - NibBits))
-		shl := (curr >> NibBits) | (next & NibMask)
+		shl := (curr >> NibBits) | (next << (WordBits - NibBits))
 
 		dst[i] = shr + curr + shl
 	}
