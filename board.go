@@ -94,9 +94,7 @@ func (b *Board) advRow(r int, buf1, buf2 Nibs) {
 
 	b.countNeigh(neigh, cs, r)
 
-	for w := 0; w < dst.words(); w++ {
-
-		alive := row[w]
+	for w, alive := range row {
 		ngbr := neigh[w]
 		keys := ngbr | (alive << 3)
 
