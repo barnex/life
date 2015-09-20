@@ -96,13 +96,17 @@ func (b *Board) advRow(r int, buf1, buf2 Nibs) {
 
 	c := 0
 	for w := 0; w < dst.words(); w++ {
-		for n := 0; n < NibsPerWord; n++ {
 
-			alive := row.get(c)
-			ngbr := neigh.get(c)
-			dst.set(c, nextLUT[(alive<<3)|ngbr])
+		alive := row[w]
+		ngbr := neigh[w]
+		keys := ngbr | (alive << 3)
+
+		for n := uint(0); n < NibsPerWord; n++ {
+			idx := getNib(keys, n)
+			dst.set(c, nextLUT[idx])
 			c++
 		}
+
 	}
 
 	// truncate last row
