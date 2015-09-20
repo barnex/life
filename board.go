@@ -49,6 +49,11 @@ func colSum(dst, a, b, c Nibs) {
 	}
 }
 
+func (b *Board) countNeigh(dst Nibs, r int) {
+	prevRow, currRow, nextRow := b.adjacentRows(r)
+	colSum(dst, prevRow, currRow, nextRow)
+}
+
 // advance row r to the next state,
 // freely using cs as a buffer.
 func (b *Board) advRow(r int, cs Nibs) {
