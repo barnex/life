@@ -3,16 +3,16 @@ package life
 import "fmt"
 
 func ExampleCountNeigh() {
-	rows, cols := 6, 32
+	rows, cols := 6, 3*16
 	b := MakeBoard(rows, cols)
 
 	BoardSet(b, 0, 0, [][]bool{
-		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, X, O, O, O, O},
-		{X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
-		{O, X, O, X, X, O, O, O, X, O, O, O, O, O, O, O, X, O, O, O},
-		{O, O, O, X, X, O, O, O, O, O, O, O, O, O, O, X, X, O, O, O},
-		{O, O, O, O, X, O, O, O, O, O, X, O, X, O, O, O, O, O, O, O},
-		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, X},
+		{X, X, O, O, O, O, O, O, O, O, O, O, O, O, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, X, O, O, O, O, O, O, O, O, O, O, O, O, O, X, O, X, X, O, O, O, X, O, O, O, O, O, O, O, X, O, X, O, O, O, O, O, O, O, O, O, O, O, O, X, X, X},
+		{X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, X, X, O, O, O, O, O, O, O, O, O, O, X, X, O, O, X, O, O, O, O, O, O, O, O, O, O, O, O, X, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, X, O, O, O, O, O, X, O, X, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, X},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 	})
 
 	cs := makeNibs(cols)
@@ -25,12 +25,13 @@ func ExampleCountNeigh() {
 	}
 
 	// Output:
-	//1100000000000011 1000000000000000
-	//2222210111000012 2100000000000000
-	//2234420111000013 3200000000000000
-	//1135530112121113 3200000000000000
-	//0013320001121112 2100000000000000
-	//0001110001121100 0000000000000000
+	//2210000000000111 0000000000001110 0000000000000011
+	//3320000000000122 2221011100001222 1100000000001243
+	//4420000000000122 3442011100001333 2210000000001343
+	//2210000000000011 3553011212111333 2210000000001354
+	//1100000000000000 1332000112111221 1110000000000122
+	//0000000000000000 0111000112110000 0000000000000011
+
 }
 
 func ExampleColSum() {
