@@ -49,8 +49,7 @@ func colSum(dst, a, b, c Nibs) {
 	}
 }
 
-func (b *Board) countNeigh(dst Nibs, r int) {
-	cs := makeNibs(dst.nibs())
+func (b *Board) countNeigh(dst, cs Nibs, r int) {
 
 	prevRow, currRow, nextRow := b.adjacentRows(r)
 	colSum(cs, prevRow, currRow, nextRow)

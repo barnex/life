@@ -15,9 +15,10 @@ func ExampleCountNeigh() {
 		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
 	})
 
+	cs := makeNibs(cols)
 	count := makeMatrix(rows, cols)
 	for r := range count {
-		b.countNeigh(count[r], r)
+		b.countNeigh(count[r], cs, r)
 	}
 	for _, row := range count {
 		fmt.Println(row)
