@@ -54,13 +54,33 @@ func (b *Board) countNeigh(dst, cs Nibs, r int) {
 	prevRow, currRow, nextRow := b.adjacentRows(r)
 	colSum(cs, prevRow, currRow, nextRow)
 
-	max := dst.nibs() - 1
+	// pipeline adjacent colSum words
+	var prev, curr, next uint64
+	next = cs[0] // prime the pipeline
 
-	dst.set(0, cs.get(0)+cs.get(1))
-	for i := 0; i < max; i++ {
-		dst.set(i, cs.get(i-1)+cs.get(i)+cs.get(i+1))
+	// bulk
+	i := 0
+	for ; i < len(cs)-1; i++ {
+		prev = curr
+		curr = next
+		next = cs[i+1]
+
+		shr := (curr << NibBits) | (prev >> (WordBits - NibBits))
+		shl := (curr >> NibBits) | (next & NibMask)
+
+		dst[i] = shr + curr + shl
 	}
-	dst.set(max, cs.get(max-1)+cs.get(max))
+
+	// last
+	prev = curr
+	curr = next
+	next = 0
+
+	shr := (curr << NibBits) | (prev >> (WordBits - NibBits))
+	shl := (curr >> NibBits) | (next & NibMask)
+
+	dst[i] = shr + curr + shl
+
 }
 
 // advance row r to the next state,
