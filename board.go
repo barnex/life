@@ -102,12 +102,14 @@ func (b *Board) advRow(r int, buf1, buf2 Nibs) {
 		keys := ngbr | (alive << 3)
 
 		var out uint64
-		for n := uint(0); n < NibsPerWord; n++ {
+		const ByteMask = 0xFF
 
-			idx := keys & NibMask
-			next := nextLUT[idx]
-			out |= next << (NibBits * n)
-			keys >>= NibBits
+		for n := uint(0); n < 8; n++ {
+
+			idx := keys & ByteMask
+			next := LUT2[idx]
+			out |= next << (8 * n)
+			keys >>= 8
 			c++
 		}
 		dst[w] = out
@@ -138,14 +140,23 @@ func (b *Board) adjacentRows(r int) (prev, curr, next Nibs) {
 
 // look-up table for next state,
 // indexed by (alive<<3)|(neigh+alive)
-var nextLUT [16]uint64
+var LUT2 [16 * 16]uint64
 
 // set-up nextLUT
 func init() {
+	var lut [16]uint64
 	for _, alive := range []uint64{0, 1} {
 		for neigh := uint64(0); neigh <= 8; neigh++ {
 			idx := (alive << 3) | neigh
-			nextLUT[idx] = nextState(alive, neigh-alive) // self is included in neigh
+			lut[idx] = nextState(alive, neigh-alive) // self is included in neigh
+		}
+	}
+
+	for i1, v1 := range lut {
+		for i2, v2 := range lut {
+			I := (i1 << NibBits) | i2
+			V := (v1 << NibBits) | v2
+			LUT2[I] = V
 		}
 	}
 }
