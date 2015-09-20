@@ -50,12 +50,17 @@ func (b *Board) countNeigh(dst, cs Nibs, r int) {
 	var prev, curr, next uint64
 	next = prevRow[0] + currRow[0] + nextRow[0] // prime the pipeline with first column sum
 
+	// offset by one for easy retrieval of next el
+	prevRow = prevRow[1:]
+	currRow = currRow[1:]
+	nextRow = nextRow[1:]
+
 	// bulk
 	i := 0
 	for ; i < len(cs)-1; i++ {
 		prev = curr
 		curr = next
-		next = prevRow[i+1] + currRow[i+1] + nextRow[i+1]
+		next = prevRow[i] + currRow[i] + nextRow[i]
 
 		shr := (curr << NibBits) | (prev >> (WordBits - NibBits))
 		shl := (curr >> NibBits) | (next << (WordBits - NibBits))
