@@ -106,8 +106,7 @@ func (b *Board) advRow(r int, buf1, buf2 Nibs) {
 
 			idx := keys & NibMask
 			next := nextLUT[idx]
-			out = setNib(out, n, next)
-
+			out |= next << (NibBits * n)
 			keys >>= NibBits
 			c++
 		}
