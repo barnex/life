@@ -1,12 +1,12 @@
 package life
 
 type Board struct {
-	rows, cols int
-	cells      []Nibs // current cells
-	temp       []Nibs // buffer for next-gen cells
-	empty      Nibs   // empty cell row used at borders
-	work, done chan int
-	serialCS   Nibs // temp hack for serial tuning
+	rows, cols            int
+	cells                 []Nibs // current cells
+	temp                  []Nibs // buffer for next-gen cells
+	empty                 Nibs   // empty cell row used at borders
+	work, done            chan int
+	serialCS, serialNeigh Nibs // temp hack for serial tuning
 }
 
 // Advance the state given number of steps
@@ -27,7 +27,7 @@ func (b *Board) advance() {
 
 func (b *Board) stepSerial() {
 	for r := range b.cells {
-		b.advRow(r, b.serialCS)
+		b.advRow(r, b.serialCS, b.serialNeigh)
 	}
 }
 
@@ -64,52 +64,30 @@ func (b *Board) countNeigh(dst, cs Nibs, r int) {
 }
 
 // advance row r to the next state,
-// freely using cs as a buffer.
-func (b *Board) advRow(r int, cs Nibs) {
+// freely using neigh as a buffer.
+func (b *Board) advRow(r int, buf1, buf2 Nibs) {
 
+	row := b.cells[r]
 	dst := b.temp[r]
-	maxNib := dst.nibs() - 1
-	maxWord := dst.words() - 1
+	cs := buf1
+	neigh := buf2
 
-	// towards counting neighbors:
-	// vertical sums over 3 rows
-	prevRow, currRow, nextRow := b.adjacentRows(r)
-	colSum(cs, prevRow, currRow, nextRow)
-
-	// pipeline with per-column sums left of cell, at cell, right of cell
-	var prevCS, currCS, nextCS uint64
-	nextCS = cs.get(0) // prime the pipeline
+	b.countNeigh(neigh, cs, r)
 
 	c := 0
-	for w := 0; w < maxWord; w++ {
+	for w := 0; w < dst.words(); w++ {
 		for n := 0; n < NibsPerWord; n++ {
 
-			alive := currRow.get(c)
-			prevCS = currCS
-			currCS = nextCS
-			nextCS = cs.get(c + 1)
-
-			neigh := prevCS + currCS + nextCS
-
-			dst.set(c, nextLUT[(alive<<3)|neigh])
+			alive := row.get(c)
+			ngbr := neigh.get(c)
+			dst.set(c, nextLUT[(alive<<3)|ngbr])
 			c++
 		}
 	}
 
-	// last word may be truncated
-	// TODO: more accurately
-	for ; c <= maxNib; c++ {
-		alive := currRow.get(c)
-		prevCS = currCS
-		currCS = nextCS
-
-		nextCS = 0
-		if c < b.cols-1 {
-			nextCS = cs.get(c + 1)
-		}
-
-		neigh := prevCS + currCS + nextCS
-		dst.set(c, nextLUT[(alive<<3)|neigh])
+	// truncate last row
+	for c := b.cols; c < dst.nibs(); c++ {
+		dst.set(c, 0)
 	}
 }
 
@@ -179,14 +157,15 @@ func (b *Board) Cols() int {
 func MakeBoard(rows, cols int) *Board {
 	roundCols := ((cols-1)/NibsPerWord + 1) * NibsPerWord // round up to multiple of 8 so it fits 64bit int
 	b := &Board{
-		rows:     rows,
-		cols:     cols,
-		cells:    makeMatrix(rows, roundCols),
-		temp:     makeMatrix(rows, roundCols),
-		empty:    makeNibs(roundCols),
-		work:     make(chan int, rows),
-		done:     make(chan int, rows),
-		serialCS: makeNibs(roundCols),
+		rows:        rows,
+		cols:        cols,
+		cells:       makeMatrix(rows, roundCols),
+		temp:        makeMatrix(rows, roundCols),
+		empty:       makeNibs(roundCols),
+		work:        make(chan int, rows),
+		done:        make(chan int, rows),
+		serialCS:    makeNibs(roundCols),
+		serialNeigh: makeNibs(roundCols),
 	}
 
 	// start parallel workers:
