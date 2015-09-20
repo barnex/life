@@ -143,7 +143,7 @@ func (b *Board) adjacentRows(r int) (prev, curr, next Nibs) {
 }
 
 // look-up table for next state,
-// indexed by (alive<<3)|(neigh+alive)
+// indexed by (alive<<3)|(neigh+alive), four times
 var LUT4 [256 * 256]uint64
 
 // set-up nextLUT
