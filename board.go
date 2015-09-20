@@ -50,8 +50,18 @@ func colSum(dst, a, b, c Nibs) {
 }
 
 func (b *Board) countNeigh(dst Nibs, r int) {
+	cs := makeNibs(dst.nibs())
+
 	prevRow, currRow, nextRow := b.adjacentRows(r)
-	colSum(dst, prevRow, currRow, nextRow)
+	colSum(cs, prevRow, currRow, nextRow)
+
+	max := dst.nibs() - 1
+
+	dst.set(0, cs.get(0)+cs.get(1))
+	for i := 0; i < max; i++ {
+		dst.set(i, cs.get(i-1)+cs.get(i)+cs.get(i+1))
+	}
+	dst.set(max, cs.get(max-1)+cs.get(max))
 }
 
 // advance row r to the next state,
