@@ -10,8 +10,7 @@ func Benchmark64M(b *testing.B) { benchmark(b, 8192) }
 
 func benchmark(b *testing.B, N int) {
 	w := MakeBoard(N, N)
-	SetRand(w, 0, 0.5)
-	w.Advance(1)
+	//SetRand(w, 0, 0.5)
 	b.SetBytes(int64(N) * int64(N))
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

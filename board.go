@@ -42,28 +42,20 @@ func (b *Board) stepParallel() {
 	}
 }
 
-// dst[i] = a[i] + b[i] + c[i].
-func colSum(dst, a, b, c Nibs) {
-	for i := range dst {
-		dst[i] = a[i] + b[i] + c[i]
-	}
-}
-
 func (b *Board) countNeigh(dst, cs Nibs, r int) {
 
 	prevRow, currRow, nextRow := b.adjacentRows(r)
-	colSum(cs, prevRow, currRow, nextRow)
 
 	// pipeline adjacent colSum words
 	var prev, curr, next uint64
-	next = cs[0] // prime the pipeline
+	next = prevRow[0] + currRow[0] + nextRow[0] // prime the pipeline with first column sum
 
 	// bulk
 	i := 0
 	for ; i < len(cs)-1; i++ {
 		prev = curr
 		curr = next
-		next = cs[i+1]
+		next = prevRow[i+1] + currRow[i+1] + nextRow[i+1]
 
 		shr := (curr << NibBits) | (prev >> (WordBits - NibBits))
 		shl := (curr >> NibBits) | (next << (WordBits - NibBits))
