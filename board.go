@@ -1,12 +1,12 @@
 package life
 
 type Board struct {
-	rows, cols            int
-	cells                 []Nibs // current cells
-	temp                  []Nibs // buffer for next-gen cells
-	empty                 Nibs   // empty cell row used at borders
-	work, done            chan int
-	serialCS, serialNeigh Nibs // temp hack for serial tuning
+	rows, cols  int
+	cells       []Nibs // current cells
+	temp        []Nibs // buffer for next-gen cells
+	empty       Nibs   // empty cell row used at borders
+	work, done  chan int
+	serialNeigh Nibs // temp hack for serial tuning
 }
 
 // Advance the state given number of steps
@@ -27,7 +27,7 @@ func (b *Board) advance() {
 
 func (b *Board) stepSerial() {
 	for r := range b.cells {
-		b.advRow(r, b.serialCS, b.serialNeigh)
+		b.advRow(r, b.serialNeigh)
 	}
 }
 
@@ -42,7 +42,7 @@ func (b *Board) stepParallel() {
 	}
 }
 
-func (b *Board) countNeigh(dst, cs Nibs, r int) {
+func (b *Board) countNeigh(dst Nibs, r int) {
 
 	prevRow, currRow, nextRow := b.adjacentRows(r)
 
@@ -57,7 +57,7 @@ func (b *Board) countNeigh(dst, cs Nibs, r int) {
 
 	// bulk
 	i := 0
-	for ; i < len(cs)-1; i++ {
+	for ; i < len(dst)-1; i++ {
 		prev = curr
 		curr = next
 		next = prevRow[i] + currRow[i] + nextRow[i]
@@ -82,14 +82,13 @@ func (b *Board) countNeigh(dst, cs Nibs, r int) {
 
 // advance row r to the next state,
 // freely using neigh as a buffer.
-func (b *Board) advRow(r int, buf1, buf2 Nibs) {
+func (b *Board) advRow(r int, buf2 Nibs) {
 
 	row := b.cells[r]
 	dst := b.temp[r]
-	cs := buf1
 	neigh := buf2
 
-	b.countNeigh(neigh, cs, r)
+	b.countNeigh(neigh, r)
 
 	for w, alive := range row {
 		ngbr := neigh[w]
@@ -214,7 +213,6 @@ func MakeBoard(rows, cols int) *Board {
 		empty:       makeNibs(roundCols),
 		work:        make(chan int, rows),
 		done:        make(chan int, rows),
-		serialCS:    makeNibs(roundCols),
 		serialNeigh: makeNibs(roundCols),
 	}
 
