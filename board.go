@@ -1,3 +1,5 @@
+// Package life provides a SIMD-accelerated implementation of
+// Conway's game of life.
 package life
 
 type Board struct {
