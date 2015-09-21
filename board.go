@@ -221,11 +221,11 @@ func MakeBoard(rows, cols int) *Board {
 	return b
 }
 
-// TODO: contiguous!!
 func makeMatrix(rows, cols int) []Nibs {
 	c := make([]Nibs, rows)
+	storage := make(Nibs, rows*cols)
 	for i := range c {
-		c[i] = makeNibs(cols)
+		c[i] = storage[i*cols : (i+1)*cols]
 	}
 	return c
 }
