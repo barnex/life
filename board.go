@@ -14,20 +14,11 @@ type Board struct {
 // Advance the state given number of steps
 func (b *Board) Advance(steps int) {
 	for i := 0; i < steps; i++ {
-		b.advance()
-	}
-}
-
-// advance one step
-func (b *Board) advance() {
-	b.stepSerial()
-	// swap: temp becomes current cells
-	b.cells, b.temp = b.temp, b.cells
-}
-
-func (b *Board) stepSerial() {
-	for r := range b.cells {
-		b.advRow(r)
+		for r := range b.cells {
+			b.advanceRow(r)
+		}
+		// swap: temp becomes current cells
+		b.cells, b.temp = b.temp, b.cells
 	}
 }
 
@@ -37,16 +28,16 @@ func (b *Board) countNeigh(dst Nibbles, r int) {
 
 	prevRow, currRow, nextRow := b.adjacentRows(r)
 
-	// pipeline adjacent colSum words
+	// pipeline with adjacent per-column words
 	var prev, curr, next uint64
 	next = prevRow[0] + currRow[0] + nextRow[0] // prime the pipeline with first column sum
 
-	// offset by one for easy retrieval of next el
+	// offset by one for easy retrieval of next element
 	prevRow = prevRow[1:]
 	currRow = currRow[1:]
 	nextRow = nextRow[1:]
 
-	// bulk
+	// bulk cells have no boundary problems
 	i := 0
 	for ; i < len(dst)-1; i++ {
 		prev = curr
@@ -59,7 +50,7 @@ func (b *Board) countNeigh(dst Nibbles, r int) {
 		dst[i] = shr + curr + shl
 	}
 
-	// last
+	// last word has no next.
 	prev = curr
 	curr = next
 	next = 0
@@ -72,11 +63,11 @@ func (b *Board) countNeigh(dst Nibbles, r int) {
 }
 
 // advance row r to the next state,
-func (b *Board) advRow(r int) {
+func (b *Board) advanceRow(r int) {
 
 	row := b.cells[r]
 	dst := b.temp[r]
-	b.countNeigh(dst, r)
+	b.countNeigh(dst, r) // abuse dst to temporarily store neighbor count
 
 	for w, alive := range row {
 		ngbr := dst[w]
@@ -105,6 +96,7 @@ func (b *Board) advRow(r int) {
 	}
 
 	// truncate last row
+	// TODO: speed-up a bit
 	for c := b.cols; c < dst.nibs(); c++ {
 		dst.Set(c, 0)
 	}
@@ -126,10 +118,10 @@ func (b *Board) adjacentRows(r int) (prev, curr, next Nibbles) {
 	return prev, curr, next
 }
 
-// Look-up table for the next states of four cells at a time.
+// Massive look-up table for the next states of four cells at a time.
 // The key for one cell is (alive<<3)|(neigh+alive), with
 // neigh+alive the number of neighbors including the cell itself.
-var LUT4 [256 * 256]uint64
+var LUT4 [16 * 16 * 16 * 16]uint64
 
 // set-up LUT4
 func init() {
