@@ -109,7 +109,7 @@ func (b *Board) advRow(r int, buf2 Nibbles) {
 
 	// truncate last row
 	for c := b.cols; c < dst.nibs(); c++ {
-		dst.set(c, 0)
+		dst.Set(c, 0)
 	}
 }
 
@@ -171,9 +171,9 @@ func nextState(alive uint64, neighbors uint64) uint64 {
 
 func (b *Board) Set(r, c int, v bool) {
 	if v {
-		b.cells[r].set(c, 1)
+		b.cells[r].Set(c, 1)
 	} else {
-		b.cells[r].set(c, 0)
+		b.cells[r].Set(c, 0)
 	}
 }
 
@@ -181,7 +181,7 @@ func (b *Board) get(r, c int) uint64 {
 	if r < 0 || c < 0 || r >= b.Rows() || c >= b.Cols() {
 		return 0
 	}
-	return b.cells[r].get(c)
+	return b.cells[r].Get(c)
 }
 func (b *Board) Get(r, c int) bool {
 	return b.get(r, c) == 1

@@ -2,20 +2,15 @@ package life
 
 import "fmt"
 
-func ExampleNibs_set() {
+func ExampleNibs_Set() {
 	n := makeNibs(32)
 	for i := 0; i < n.nibs(); i++ {
-		n.set(i, uint64(i%10))
+		n.Set(i, uint64(i%10))
 	}
 	fmt.Println(n)
 
 	//Output:
 	//0123456789012345 6789012345678901
-}
-
-func ExampleNibs_get() {
-	n := makeNibs(32)
-	n.get(0)
 }
 
 func ExampleGetNib() {
