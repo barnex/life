@@ -1,5 +1,7 @@
-# life
-Conway's game of life on SIMD steroids.
+# Game of life, SIMD-style
+[![GoDoc](https://godoc.org/github.com/barnex/life?status.svg)](https://godoc.org/github.com/barnex/life) [![Build Status](https://travis-ci.org/barnex/life.svg?branch=master)](https://travis-ci.org/barnex/life)
+
+Fast implementation of Conway's game of life.
 
 This implementation packs 16 cell states in a single 64-bit integer, using 4 bits of storage per cell. Counting neighbors is done SIMD-style, operating on 16 4-bit values at a time. Updating the alive state uses a massive look-up table operating on 4 cells at a time.
 
