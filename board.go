@@ -2,13 +2,13 @@
 // Conway's game of life.
 package life
 
+// Board stores cells states and provides a method for advancing to the next generation.
 type Board struct {
-	rows, cols  int
-	cells       []Nibs // current cells
-	temp        []Nibs // buffer for next-gen cells
-	empty       Nibs   // empty cell row used at borders
-	work, done  chan int
-	serialNeigh Nibs // temp hack for serial tuning
+	rows, cols int
+	cells      []Nibs // current cells
+	temp       []Nibs // buffer for next-gen cells
+	empty      Nibs   // empty cell row used at borders
+	//work, done  chan int // for multi-threading
 }
 
 // Advance the state given number of steps
@@ -29,18 +29,7 @@ func (b *Board) advance() {
 
 func (b *Board) stepSerial() {
 	for r := range b.cells {
-		b.advRow(r, b.serialNeigh)
-	}
-}
-
-func (b *Board) stepParallel() {
-	// do rows in parallel
-	for r := 0; r < b.rows; r++ {
-		b.work <- r
-	}
-	// wait for result
-	for r := 0; r < b.rows; r++ {
-		<-b.done
+		b.advRow(r, b.temp[r])
 	}
 }
 
@@ -208,14 +197,11 @@ func (b *Board) Cols() int {
 func MakeBoard(rows, cols int) *Board {
 	roundCols := ((cols-1)/NibsPerWord + 1) * NibsPerWord // round up to multiple of 8 so it fits 64bit int
 	b := &Board{
-		rows:        rows,
-		cols:        cols,
-		cells:       makeMatrix(rows, roundCols),
-		temp:        makeMatrix(rows, roundCols),
-		empty:       makeNibs(roundCols),
-		work:        make(chan int, rows),
-		done:        make(chan int, rows),
-		serialNeigh: makeNibs(roundCols),
+		rows:  rows,
+		cols:  cols,
+		cells: makeMatrix(rows, roundCols),
+		temp:  makeMatrix(rows, roundCols),
+		empty: makeNibs(roundCols),
 	}
 
 	// start parallel workers:
@@ -243,3 +229,14 @@ func makeMatrix(rows, cols int) []Nibs {
 	}
 	return c
 }
+
+//func (b *Board) stepParallel() {
+//	// do rows in parallel
+//	for r := 0; r < b.rows; r++ {
+//		b.work <- r
+//	}
+//	// wait for result
+//	for r := 0; r < b.rows; r++ {
+//		<-b.done
+//	}
+//}

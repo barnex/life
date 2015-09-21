@@ -1,7 +1,7 @@
 # Game of life, SIMD performance
 [![GoDoc](https://godoc.org/github.com/barnex/life?status.svg)](https://godoc.org/github.com/barnex/life) [![Build Status](https://travis-ci.org/barnex/life.svg?branch=master)](https://travis-ci.org/barnex/life)
 
-Fast implementation of Conway's game of life.
+SIMD-accelerated implementation of Conway's game of life.
 
 This implementation packs 16 cell states in a single 64-bit integer, using 4 bits of storage per cell. Most operations are done SIMD-style, operating on 16 nibbles at a time. 
 
