@@ -20,7 +20,7 @@ func ExampleNibs_get() {
 
 func ExampleGetNib() {
 	w := uint64(0xFEDCBA9876543210)
-	for i := uint(0); i < NibsPerWord; i++ {
+	for i := uint(0); i < NibblesPerWord; i++ {
 		fmt.Printf("%x ", getNib(w, i))
 	}
 
@@ -30,7 +30,7 @@ func ExampleGetNib() {
 
 func ExampleSetNib() {
 	w := uint64(0)
-	for i := uint(0); i < NibsPerWord; i++ {
+	for i := uint(0); i < NibblesPerWord; i++ {
 		w = setNib(w, i, uint64(i))
 		fmt.Printf("%016x\n", w)
 	}

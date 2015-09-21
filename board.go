@@ -5,9 +5,9 @@ package life
 // Board stores cells states and provides a method for advancing to the next generation.
 type Board struct {
 	rows, cols int
-	cells      []Nibs // current cells
-	temp       []Nibs // buffer for next-gen cells
-	empty      Nibs   // empty cell row used at borders
+	cells      []Nibbles // current cells
+	temp       []Nibbles // buffer for next-gen cells
+	empty      Nibbles   // empty cell row used at borders
 	//work, done  chan int // for multi-threading
 }
 
@@ -33,7 +33,7 @@ func (b *Board) stepSerial() {
 	}
 }
 
-func (b *Board) countNeigh(dst Nibs, r int) {
+func (b *Board) countNeigh(dst Nibbles, r int) {
 
 	prevRow, currRow, nextRow := b.adjacentRows(r)
 
@@ -53,8 +53,8 @@ func (b *Board) countNeigh(dst Nibs, r int) {
 		curr = next
 		next = prevRow[i] + currRow[i] + nextRow[i]
 
-		shr := (curr << NibBits) | (prev >> (WordBits - NibBits))
-		shl := (curr >> NibBits) | (next << (WordBits - NibBits))
+		shr := (curr << NibbleBits) | (prev >> (WordBits - NibbleBits))
+		shl := (curr >> NibbleBits) | (next << (WordBits - NibbleBits))
 
 		dst[i] = shr + curr + shl
 	}
@@ -64,8 +64,8 @@ func (b *Board) countNeigh(dst Nibs, r int) {
 	curr = next
 	next = 0
 
-	shr := (curr << NibBits) | (prev >> (WordBits - NibBits))
-	shl := (curr >> NibBits) | (next & NibMask)
+	shr := (curr << NibbleBits) | (prev >> (WordBits - NibbleBits))
+	shl := (curr >> NibbleBits) | (next & NibbleMask)
 
 	dst[i] = shr + curr + shl
 
@@ -73,7 +73,7 @@ func (b *Board) countNeigh(dst Nibs, r int) {
 
 // advance row r to the next state,
 // freely using neigh as a buffer.
-func (b *Board) advRow(r int, buf2 Nibs) {
+func (b *Board) advRow(r int, buf2 Nibbles) {
 
 	row := b.cells[r]
 	dst := b.temp[r]
@@ -116,7 +116,7 @@ func (b *Board) advRow(r int, buf2 Nibs) {
 // get rows adjacent to r, without going out of bounds.
 // returns row r-1, r, r+1, replacing out-of-bound rows
 // by a row of zeros.
-func (b *Board) adjacentRows(r int) (prev, curr, next Nibs) {
+func (b *Board) adjacentRows(r int) (prev, curr, next Nibbles) {
 	prev = b.empty
 	if r > 0 {
 		prev = b.cells[r-1]
@@ -146,8 +146,8 @@ func init() {
 	var LUT2 [16 * 16]uint64
 	for i1, v1 := range lut {
 		for i2, v2 := range lut {
-			I := (i1 << NibBits) | i2
-			V := (v1 << NibBits) | v2
+			I := (i1 << NibbleBits) | i2
+			V := (v1 << NibbleBits) | v2
 			LUT2[I] = V
 		}
 	}
@@ -195,7 +195,7 @@ func (b *Board) Cols() int {
 }
 
 func MakeBoard(rows, cols int) *Board {
-	roundCols := ((cols-1)/NibsPerWord + 1) * NibsPerWord // round up to multiple of 8 so it fits 64bit int
+	roundCols := ((cols-1)/NibblesPerWord + 1) * NibblesPerWord // round up to multiple of 8 so it fits 64bit int
 	b := &Board{
 		rows:  rows,
 		cols:  cols,
