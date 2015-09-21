@@ -69,3 +69,16 @@ func makeNibs(n int) Nibs {
 	}
 	return make(Nibs, n/NibsPerWord)
 }
+
+func makeMatrix(rows, cols int) []Nibs {
+	if cols%NibsPerWord != 0 {
+		panic(cols)
+	}
+	cols /= NibsPerWord
+	storage := make(Nibs, rows*cols)
+	c := make([]Nibs, rows)
+	for i := range c {
+		c[i] = storage[i*cols : (i+1)*cols]
+	}
+	return c
+}

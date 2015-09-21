@@ -221,15 +221,6 @@ func MakeBoard(rows, cols int) *Board {
 	return b
 }
 
-func makeMatrix(rows, cols int) []Nibs {
-	c := make([]Nibs, rows)
-	storage := make(Nibs, rows*cols)
-	for i := range c {
-		c[i] = storage[i*cols : (i+1)*cols]
-	}
-	return c
-}
-
 //func (b *Board) stepParallel() {
 //	// do rows in parallel
 //	for r := 0; r < b.rows; r++ {
