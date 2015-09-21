@@ -20,19 +20,19 @@ func (b *Board) Advance(steps int) {
 
 // advance one step
 func (b *Board) advance() {
-	//b.stepParallel()
 	b.stepSerial()
-
 	// swap: temp becomes current cells
 	b.cells, b.temp = b.temp, b.cells
 }
 
 func (b *Board) stepSerial() {
 	for r := range b.cells {
-		b.advRow(r, b.temp[r])
+		b.advRow(r)
 	}
 }
 
+// countNeigh counts the neighbors of all cells on row r
+// and stores the result in dst.
 func (b *Board) countNeigh(dst Nibbles, r int) {
 
 	prevRow, currRow, nextRow := b.adjacentRows(r)
@@ -72,17 +72,14 @@ func (b *Board) countNeigh(dst Nibbles, r int) {
 }
 
 // advance row r to the next state,
-// freely using neigh as a buffer.
-func (b *Board) advRow(r int, buf2 Nibbles) {
+func (b *Board) advRow(r int) {
 
 	row := b.cells[r]
 	dst := b.temp[r]
-	neigh := buf2
-
-	b.countNeigh(neigh, r)
+	b.countNeigh(dst, r)
 
 	for w, alive := range row {
-		ngbr := neigh[w]
+		ngbr := dst[w]
 		keys := ngbr | (alive << 3)
 
 		idx := uint16(keys)
@@ -129,12 +126,14 @@ func (b *Board) adjacentRows(r int) (prev, curr, next Nibbles) {
 	return prev, curr, next
 }
 
-// look-up table for next state,
-// indexed by (alive<<3)|(neigh+alive), four times
+// Look-up table for the next states of four cells at a time.
+// The key for one cell is (alive<<3)|(neigh+alive), with
+// neigh+alive the number of neighbors including the cell itself.
 var LUT4 [256 * 256]uint64
 
-// set-up nextLUT
+// set-up LUT4
 func init() {
+	// table for one cell
 	var lut [16]uint64
 	for _, alive := range []uint64{0, 1} {
 		for neigh := uint64(0); neigh <= 8; neigh++ {
@@ -143,6 +142,7 @@ func init() {
 		}
 	}
 
+	// table for two cells at a time
 	var LUT2 [16 * 16]uint64
 	for i1, v1 := range lut {
 		for i2, v2 := range lut {
@@ -152,6 +152,7 @@ func init() {
 		}
 	}
 
+	// table for four cells at a time
 	for i1, v1 := range LUT2 {
 		for i2, v2 := range LUT2 {
 			I := (i1 << 8) | i2
