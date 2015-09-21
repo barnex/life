@@ -31,11 +31,10 @@ func (n Nibbles) String() string {
 
 // Get returns the i'th element from the nibble array.
 func (n Nibbles) Get(i int) uint64 {
-	w := i / NibblesPerWord
+	wordpos := i / NibblesPerWord
 	bitpos := uint(i % NibblesPerWord)
-
-	word := n[w]
-	return getNib(word, bitpos)
+	shift := bitpos * NibbleBits
+	return (n[wordpos] >> shift) & NibbleMask
 }
 
 // Set sets the nibble array's i'th element to v.
@@ -43,11 +42,6 @@ func (n Nibbles) Set(i int, v uint64) {
 	w := i / NibblesPerWord
 	nibpos := uint(i % NibblesPerWord)
 	n[w] = setNib(n[w], nibpos, uint64(v))
-}
-
-func getNib(w uint64, nibpos uint) uint64 {
-	sh := nibpos * NibbleBits
-	return (w >> sh) & NibbleMask
 }
 
 func setNib(w uint64, nibpos uint, v uint64) uint64 {
