@@ -10,14 +10,19 @@ import (
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/keybind"
-	"github.com/BurntSushi/xgbutil/xevent"
+	//"github.com/BurntSushi/xgbutil/xevent"
 	"github.com/BurntSushi/xgbutil/xgraphics"
 	"github.com/BurntSushi/xgbutil/xwindow"
 	"github.com/barnex/life"
 	"image"
-	"image/color"
 	"log"
-	"time"
+	"os"
+	"runtime/pprof"
+)
+
+const (
+	Width  = 1920
+	Height = 1024
 )
 
 func main() {
@@ -35,7 +40,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Could not generate a new window X id: %s", err)
 	}
-	win.Create(X.RootWin(), 0, 0, 1024, 768, xproto.CwBackPixel, 0x606060ff)
+	win.Create(X.RootWin(), 0, 0, Width, Height, xproto.CwBackPixel, 0x606060ff)
 
 	// Listen for Key{Press,Release} events.
 	win.Listen(xproto.EventMaskKeyPress, xproto.EventMaskKeyRelease)
@@ -74,63 +79,63 @@ func main() {
 	}
 
 	// I /think/ XDraw actually sends data to server?
-	img.XDraw()
+	//img.XDraw()
 	// I /think/ XPaint tells the server to paint image to window
 	img.XPaint(win.Id)
 
+	initPProf()
+
 	//Start the routine that updates the window
-	go updater(img, win)
+	for i := 0; i < 100; i++ {
+		updater(img, win)
+	}
+
+	pprof.StopCPUProfile()
 
 	//This seems to start a main loop for listening to xevents
-	xevent.Main(X)
+	//xevent.Main(X)
 }
 
-var board = life.MakeBoard(512, 512)
+func initPProf() {
+	fname := "cpu.pprof"
+	f, err := os.Create(fname)
+	if err != nil {
+		log.Fatal(err)
+	}
+	err = pprof.StartCPUProfile(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("writing CPU profile to", fname)
+}
+
+var board = life.MakeBoard(Width, Height)
 
 func init() {
 	life.SetRand(board, 1, 0.1)
 }
 
 func updater(img *xgraphics.Image, win *xwindow.Window) {
-	//We keep track of times based on 1024 frames
-	frame := 0
-	start := time.Now()
-	var genStart, drawStart time.Time
-	var genTotal, drawTotal time.Duration
 
-	for {
-		frame = frame + 1
-		if frame > 1024 {
-			frame = 0
-			log.Printf("Time elapsed: %s\n", time.Now().Sub(start))
-			log.Printf("Time generate: %s\n", genTotal)
-			log.Printf("Time drawing: %s\n", drawTotal)
-			start = time.Now()
-			drawTotal, genTotal = 0, 0
-		}
+	// render here
+	board.Advance(1)
+	render(img, board)
 
-		genStart = time.Now()
-
-		// render here
-		board.Advance(1)
-		render(img, board)
-
-		genTotal += time.Now().Sub(genStart)
-		drawStart = time.Now()
-		//hopefully using checked will block us from drawing again before x
-		//draws although XDraw might block anyway, we can check for an error
-		//here
-		err := img.XDrawChecked()
-		if err != nil {
-			log.Println(err)
-			return
-		}
-		//img.XDraw()
-
-		img.XPaint(win.Id)
-		drawTotal += time.Now().Sub(drawStart)
+	//hopefully using checked will block us from drawing again before x
+	//draws although XDraw might block anyway, we can check for an error
+	//here
+	err := img.XDrawChecked()
+	if err != nil {
+		log.Println(err)
+		return
 	}
+	//	img.XDraw()
+
+	img.XPaint(win.Id)
 }
+
+var White = xgraphics.BGRA{B: 255, R: 255, G: 255}
+var Black = xgraphics.BGRA{B: 0, R: 0, G: 0}
 
 func render(img *xgraphics.Image, b *life.Board) {
 	rows, cols := b.Rows(), b.Cols()
@@ -138,9 +143,9 @@ func render(img *xgraphics.Image, b *life.Board) {
 	for r := 0; r < rows; r++ {
 		for c := 0; c < cols; c++ {
 			if b.Get(r, c) {
-				img.Set(r, c, color.White)
+				img.SetBGRA(r, c, White)
 			} else {
-				img.Set(r, c, color.Black)
+				img.SetBGRA(r, c, Black)
 			}
 		}
 	}
