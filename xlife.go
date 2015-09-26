@@ -3,41 +3,41 @@
 package main
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	_ "image/png"
-	"log"
+	"time"
 
-	"github.com/BurntSushi/xgbutil"
-	"github.com/BurntSushi/xgbutil/xevent"
-	"github.com/BurntSushi/xgbutil/xgraphics"
+	"github.com/BurntSushi/xgb"
+	"github.com/BurntSushi/xgb/xproto"
 	"github.com/barnex/life"
 )
 
 func main() {
-	X, err := xgbutil.NewConn()
+
+	X, err := xgb.NewConn()
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println(err)
+		return
 	}
 
-	N := 512
-	board := life.MakeBoard(N, N)
-	life.SetRand(board, 0, 0.1)
-	img := render(nil, board)
+	wid, _ := xproto.NewWindowId(X)
+	screen := xproto.Setup(X).DefaultScreen(X)
+	xproto.CreateWindow(X, screen.RootDepth, wid, screen.Root,
+		0, 0, 500, 500, 0,
+		xproto.WindowClassInputOutput, screen.RootVisual,
+		xproto.CwBackPixel|xproto.CwEventMask,
+		[]uint32{ // values must be in the order defined by the protocol
+			0xffffffff,
+			xproto.EventMaskStructureNotify |
+				xproto.EventMaskKeyPress |
+				xproto.EventMaskKeyRelease})
 
-	// Now convert it into an X image.
-	ximg := xgraphics.NewConvert(X, img)
+	xproto.MapWindow(X, wid)
 
-	// Now show it in a new window.
-	// We set the window title and tell the program to quit gracefully when
-	// the window is closed.
-	// There is also a convenience method, XShow, that requires no parameters.
-	ximg.XShowExtra("The Go Gopher!", true)
+	time.Sleep(10 * time.Second)
 
-	// If we don't block, the program will end and the window will disappear.
-	// We could use a 'select{}' here, but xevent.Main will emit errors if
-	// something went wrong, so use that instead.
-	xevent.Main(X)
 }
 
 func render(img *image.RGBA, b *life.Board) *image.RGBA {
@@ -50,9 +50,9 @@ func render(img *image.RGBA, b *life.Board) *image.RGBA {
 	for r := 0; r < rows; r++ {
 		for c := 0; c < cols; c++ {
 			if b.Get(r, c) {
-				img.Set(r, c, color.Black)
-			} else {
 				img.Set(r, c, color.White)
+			} else {
+				img.Set(r, c, color.Black)
 			}
 		}
 	}
