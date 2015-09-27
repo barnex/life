@@ -187,8 +187,13 @@ func (b *Board) Cols() int {
 	return b.cols
 }
 
+// Integer division, rounded up.
+func DivUp(x, y int) int {
+	return ((x-1)/y + 1)
+}
+
 func MakeBoard(rows, cols int) *Board {
-	roundCols := ((cols-1)/NibblesPerWord + 1) * NibblesPerWord // round up to multiple of 8 so it fits 64bit int
+	roundCols := DivUp(cols, NibblesPerWord) * NibblesPerWord // round up number of columns to fit 64-bit
 	b := &Board{
 		rows:  rows,
 		cols:  cols,

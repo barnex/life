@@ -25,10 +25,12 @@ import (
 	"github.com/barnex/life"
 )
 
-const (
-	Cols   = 1920 - 1
-	Rows   = 1024 - 1
-	Width  = Cols
+const CellsPerWord = life.NibblesPerWord
+
+var (
+	Cols   = 1920 - 13
+	Rows   = 1024
+	Width  = life.DivUp(Cols, CellsPerWord) * CellsPerWord // image too wide to fit border
 	Height = Rows
 )
 
@@ -159,13 +161,13 @@ const (
 )
 
 func render(img *xgraphics.Image, b *life.Board) {
-	rows, cols := b.Rows(), b.Cols()
 
-	pixels := (*(*[1 << 31]uint32)(unsafe.Pointer(&img.Pix[0])))[:rows*cols]
+	pixels := (*(*[1 << 31]uint32)(unsafe.Pointer(&img.Pix[0])))[:Width*Height]
 
 	i := 0
-	for r := 0; r < rows; r++ {
-		for c := 0; c < cols; c++ {
+	for r := 0; r < Rows; r++ {
+		for c := 0; c < Width; c++ {
+
 			if b.Get(r, c) {
 				pixels[i] = White
 			} else {
