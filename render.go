@@ -44,7 +44,7 @@ func colorScheme(i int) byte {
 	if i > 15 {
 		panic(i)
 	}
-	return byte(i) * 16
+	return byte(i) * (255 / 15)
 }
 
 var lut2 [16 * 16]uint64
