@@ -9,7 +9,6 @@ package main
 import (
 	"fmt"
 	"time"
-	"unsafe"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
@@ -28,13 +27,19 @@ import (
 const CellsPerWord = life.NibblesPerWord
 
 var (
-	Cols   = 1920 //- 13
+	Cols   = 1920 - 13
 	Rows   = 1024
 	Width  = life.DivUp(Cols, CellsPerWord) * CellsPerWord // image too wide to fit border
 	Height = Rows
 )
 
+var board *life.Board
+
 func main() {
+
+	board = life.MakeBoard(Rows, Cols)
+	life.SetRand(board, 1, 0.1)
+
 	X, err := xgbutil.NewConn()
 	if err != nil {
 		log.Println(err)
@@ -118,8 +123,6 @@ func initPProf() {
 	log.Println("writing CPU profile to", fname)
 }
 
-var board = life.MakeBoard(Rows, Cols)
-
 var (
 	start = time.Now()
 	gens  int
@@ -135,7 +138,7 @@ func updater(img *xgraphics.Image, win *xwindow.Window) {
 
 	// render here
 	board.Advance(1)
-	Render(img, board)
+	board.Render(img.Pix)
 
 	//hopefully using checked will block us from drawing again before x
 	//draws although XDraw might block anyway, we can check for an error
@@ -149,62 +152,4 @@ func updater(img *xgraphics.Image, win *xwindow.Window) {
 
 	img.XPaint(win.Id)
 	gens++
-}
-
-const (
-	White uint64 = 0x00FFFFFF
-	Black uint64 = 0x00000000
-)
-
-func Render(img *xgraphics.Image, b *life.Board) {
-
-	pixels := (*(*[1 << 31]uint64)(unsafe.Pointer(&img.Pix[0])))[:Width*Height]
-
-	if Width%CellsPerWord != 0 {
-		panic(fmt.Sprint("width=", Width))
-	}
-	Words := uint(Width) / CellsPerWord
-
-	i := 0
-	for r := 0; r < Rows; r++ {
-		row := b.Cells[r]
-		for w := uint(0); w < Words; w++ {
-			word := row[w]
-			pixels[i] = lut2[byte(word)]
-			i++
-			pixels[i] = lut2[byte(word>>8)]
-			i++
-			pixels[i] = lut2[byte(word>>16)]
-			i++
-			pixels[i] = lut2[byte(word>>24)]
-			i++
-			pixels[i] = lut2[byte(word>>32)]
-			i++
-			pixels[i] = lut2[byte(word>>40)]
-			i++
-			pixels[i] = lut2[byte(word>>48)]
-			i++
-			pixels[i] = lut2[byte(word>>56)]
-			i++
-		}
-	}
-}
-
-var lut2 [16 * 16]uint64
-
-func init() {
-	life.SetRand(board, 1, 0.1)
-
-	var lut [16]uint64
-	lut[1] = White
-
-	for k1 := range lut {
-		for k2 := range lut {
-			v1 := lut[k1]
-			v2 := lut[k2]
-			K := k1<<life.NibbleBits | k2
-			V := v1<<32 | v2
-			lut2[K] = V
-		}
-	}
 }
