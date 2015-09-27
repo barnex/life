@@ -28,7 +28,7 @@ import (
 const CellsPerWord = life.NibblesPerWord
 
 var (
-	Cols   = 1920 - 13
+	Cols   = 1920 //- 13
 	Rows   = 1024
 	Width  = life.DivUp(Cols, CellsPerWord) * CellsPerWord // image too wide to fit border
 	Height = Rows
@@ -169,18 +169,23 @@ func Render(img *xgraphics.Image, b *life.Board) {
 	for r := 0; r < Rows; r++ {
 		row := b.Cells[r]
 		for w := uint(0); w < Words; w++ {
-
-			for c := uint(0); c < 8; c++ {
-
-				word := row[w]
-				shift := uint(8 * c)
-				val := (word >> shift) & 0xFF
-
-				pixels[i] = lut2[val]
-
-				i++
-
-			}
+			word := row[w]
+			pixels[i] = lut2[byte(word)]
+			i++
+			pixels[i] = lut2[byte(word>>8)]
+			i++
+			pixels[i] = lut2[byte(word>>16)]
+			i++
+			pixels[i] = lut2[byte(word>>24)]
+			i++
+			pixels[i] = lut2[byte(word>>32)]
+			i++
+			pixels[i] = lut2[byte(word>>40)]
+			i++
+			pixels[i] = lut2[byte(word>>48)]
+			i++
+			pixels[i] = lut2[byte(word>>56)]
+			i++
 		}
 	}
 }
