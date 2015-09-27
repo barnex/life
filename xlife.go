@@ -26,8 +26,10 @@ import (
 )
 
 const (
-	Width  = 1920
-	Height = 1024
+	Cols   = 1920 - 1
+	Rows   = 1024 - 1
+	Width  = Cols
+	Height = Rows
 )
 
 func main() {
@@ -114,7 +116,7 @@ func initPProf() {
 	log.Println("writing CPU profile to", fname)
 }
 
-var board = life.MakeBoard(Width, Height)
+var board = life.MakeBoard(Rows, Cols)
 
 func init() {
 	life.SetRand(board, 1, 0.1)
@@ -162,8 +164,8 @@ func render(img *xgraphics.Image, b *life.Board) {
 	pixels := (*(*[1 << 31]uint32)(unsafe.Pointer(&img.Pix[0])))[:rows*cols]
 
 	i := 0
-	for c := 0; c < cols; c++ {
-		for r := 0; r < rows; r++ {
+	for r := 0; r < rows; r++ {
+		for c := 0; c < cols; c++ {
 			if b.Get(r, c) {
 				pixels[i] = White
 			} else {
