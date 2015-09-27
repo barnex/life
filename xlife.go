@@ -7,17 +7,22 @@
 package main
 
 import (
+	"fmt"
+	"time"
+	"unsafe"
+
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/keybind"
 	//"github.com/BurntSushi/xgbutil/xevent"
-	"github.com/BurntSushi/xgbutil/xgraphics"
-	"github.com/BurntSushi/xgbutil/xwindow"
-	"github.com/barnex/life"
 	"image"
 	"log"
 	"os"
 	"runtime/pprof"
+
+	"github.com/BurntSushi/xgbutil/xgraphics"
+	"github.com/BurntSushi/xgbutil/xwindow"
+	"github.com/barnex/life"
 )
 
 const (
@@ -68,7 +73,7 @@ func main() {
 	//	}).Connect(X, win.Id)
 
 	//So here i'm going to try to make a image..'
-	img := xgraphics.New(X, image.Rect(0, 0, 1024, 768))
+	img := xgraphics.New(X, image.Rect(0, 0, Width, Height))
 
 	err = img.XSurfaceSet(win.Id)
 	if err != nil {
@@ -86,7 +91,7 @@ func main() {
 	initPProf()
 
 	//Start the routine that updates the window
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 128; i++ {
 		updater(img, win)
 	}
 
@@ -115,7 +120,18 @@ func init() {
 	life.SetRand(board, 1, 0.1)
 }
 
+var (
+	start = time.Now()
+	gens  int
+)
+
 func updater(img *xgraphics.Image, win *xwindow.Window) {
+	if gens == 32 {
+		fps := float64(gens) / time.Since(start).Seconds()
+		fmt.Println(fps, "FPS")
+		start = time.Now()
+		gens = 0
+	}
 
 	// render here
 	board.Advance(1)
@@ -132,21 +148,28 @@ func updater(img *xgraphics.Image, win *xwindow.Window) {
 	//	img.XDraw()
 
 	img.XPaint(win.Id)
+	gens++
 }
 
-var White = xgraphics.BGRA{B: 255, R: 255, G: 255}
-var Black = xgraphics.BGRA{B: 0, R: 0, G: 0}
+const (
+	White uint32 = 0xFFFFFFFF
+	Black uint32 = 0x00000000
+)
 
 func render(img *xgraphics.Image, b *life.Board) {
 	rows, cols := b.Rows(), b.Cols()
 
-	for r := 0; r < rows; r++ {
-		for c := 0; c < cols; c++ {
+	pixels := (*(*[1 << 31]uint32)(unsafe.Pointer(&img.Pix[0])))[:rows*cols]
+
+	i := 0
+	for c := 0; c < cols; c++ {
+		for r := 0; r < rows; r++ {
 			if b.Get(r, c) {
-				img.SetBGRA(r, c, White)
+				pixels[i] = White
 			} else {
-				img.SetBGRA(r, c, Black)
+				pixels[i] = Black
 			}
+			i++
 		}
 	}
 }
