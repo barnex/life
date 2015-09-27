@@ -38,7 +38,7 @@ var board *life.Board
 func main() {
 
 	board = life.MakeBoard(Rows, Cols)
-	life.SetRand(board, 1, 0.1)
+	life.SetRand(board, 1, 0.2725)
 
 	X, err := xgbutil.NewConn()
 	if err != nil {
@@ -97,14 +97,14 @@ func main() {
 	// I /think/ XPaint tells the server to paint image to window
 	img.XPaint(win.Id)
 
-	initPProf()
+	//initPProf()
 
 	//Start the routine that updates the window
-	for i := 0; i < 128; i++ {
+	for i := 0; i < 128; i += 0 {
 		updater(img, win)
 	}
 
-	pprof.StopCPUProfile()
+	//pprof.StopCPUProfile()
 
 	//This seems to start a main loop for listening to xevents
 	//xevent.Main(X)

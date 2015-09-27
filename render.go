@@ -1,7 +1,6 @@
 package life
 
 import (
-	"fmt"
 	"unsafe"
 )
 
@@ -44,7 +43,8 @@ func colorScheme(i int) byte {
 	if i > 15 {
 		panic(i)
 	}
-	return byte(i) * (255 / 15)
+	col := byte(i) * (255 / 15)
+	return col
 }
 
 var lut2 [16 * 16]uint64
@@ -56,7 +56,6 @@ func init() {
 		c := uint32(colorScheme(i))
 		color := c<<24 | c<<16 | c<<8 | c
 		lut[i] = color
-		fmt.Printf("0%08x\n", color)
 	}
 
 	for k1 := range lut {
