@@ -5,7 +5,7 @@ package life
 // Board stores cells states and provides a method for advancing to the next generation.
 type Board struct {
 	rows, cols int
-	cells      []Nibbles // current cells
+	Cells      []Nibbles // current cells
 	temp       []Nibbles // buffer for next-gen cells
 	empty      Nibbles   // empty cell row used at borders
 	//work, done  chan int // for multi-threading
@@ -14,11 +14,11 @@ type Board struct {
 // Advance the state given number of steps
 func (b *Board) Advance(steps int) {
 	for i := 0; i < steps; i++ {
-		for r := range b.cells {
+		for r := range b.Cells {
 			b.advanceRow(r)
 		}
 		// swap: temp becomes current cells
-		b.cells, b.temp = b.temp, b.cells
+		b.Cells, b.temp = b.temp, b.Cells
 	}
 }
 
@@ -65,7 +65,7 @@ func (b *Board) countNeigh(dst Nibbles, r int) {
 // advance row r to the next state,
 func (b *Board) advanceRow(r int) {
 
-	row := b.cells[r]
+	row := b.Cells[r]
 	dst := b.temp[r]
 	b.countNeigh(dst, r) // abuse dst to temporarily store neighbor count
 
@@ -108,12 +108,12 @@ func (b *Board) advanceRow(r int) {
 func (b *Board) adjacentRows(r int) (prev, curr, next Nibbles) {
 	prev = b.empty
 	if r > 0 {
-		prev = b.cells[r-1]
+		prev = b.Cells[r-1]
 	}
-	curr = b.cells[r]
+	curr = b.Cells[r]
 	next = b.empty
 	if r < b.rows-1 {
-		next = b.cells[r+1]
+		next = b.Cells[r+1]
 	}
 	return prev, curr, next
 }
@@ -164,9 +164,9 @@ func nextState(alive uint64, neighbors uint64) uint64 {
 
 func (b *Board) Set(r, c int, v bool) {
 	if v {
-		b.cells[r].Set(c, 1)
+		b.Cells[r].Set(c, 1)
 	} else {
-		b.cells[r].Set(c, 0)
+		b.Cells[r].Set(c, 0)
 	}
 }
 
@@ -174,7 +174,7 @@ func (b *Board) get(r, c int) uint64 {
 	if r < 0 || c < 0 || r >= b.Rows() || c >= b.Cols() {
 		return 0
 	}
-	return b.cells[r].Get(c)
+	return b.Cells[r].Get(c)
 }
 func (b *Board) Get(r, c int) bool {
 	return b.get(r, c) == 1
@@ -197,7 +197,7 @@ func MakeBoard(rows, cols int) *Board {
 	b := &Board{
 		rows:  rows,
 		cols:  cols,
-		cells: makeMatrix(rows, roundCols),
+		Cells: makeMatrix(rows, roundCols),
 		temp:  makeMatrix(rows, roundCols),
 		empty: makeNibs(roundCols),
 	}

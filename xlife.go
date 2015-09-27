@@ -139,7 +139,7 @@ func updater(img *xgraphics.Image, win *xwindow.Window) {
 
 	// render here
 	board.Advance(1)
-	render(img, board)
+	Render(img, board)
 
 	//hopefully using checked will block us from drawing again before x
 	//draws although XDraw might block anyway, we can check for an error
@@ -160,20 +160,33 @@ const (
 	Black uint32 = 0x00000000
 )
 
-func render(img *xgraphics.Image, b *life.Board) {
+func Render(img *xgraphics.Image, b *life.Board) {
 
 	pixels := (*(*[1 << 31]uint32)(unsafe.Pointer(&img.Pix[0])))[:Width*Height]
 
+	if Width%CellsPerWord != 0 {
+		panic(fmt.Sprint("width=", Width))
+	}
+	Words := uint(Width) / CellsPerWord
+
 	i := 0
 	for r := 0; r < Rows; r++ {
-		for c := 0; c < Width; c++ {
+		row := b.Cells[r]
+		for w := uint(0); w < Words; w++ {
+			for c := uint(0); c < CellsPerWord; c++ {
 
-			if b.Get(r, c) {
-				pixels[i] = White
-			} else {
-				pixels[i] = Black
+				word := row[w]
+				shift := uint(life.NibbleBits * c)
+				val := (word >> shift) & life.NibbleMask
+
+				if val == 0 {
+					pixels[i] = Black
+				} else {
+					pixels[i] = White
+				}
+				i++
+
 			}
-			i++
 		}
 	}
 }
