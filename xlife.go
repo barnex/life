@@ -120,10 +120,6 @@ func initPProf() {
 
 var board = life.MakeBoard(Rows, Cols)
 
-func init() {
-	life.SetRand(board, 1, 0.1)
-}
-
 var (
 	start = time.Now()
 	gens  int
@@ -156,13 +152,13 @@ func updater(img *xgraphics.Image, win *xwindow.Window) {
 }
 
 const (
-	White uint32 = 0xFFFFFFFF
-	Black uint32 = 0x00000000
+	White uint64 = 0x00FFFFFF
+	Black uint64 = 0x00000000
 )
 
 func Render(img *xgraphics.Image, b *life.Board) {
 
-	pixels := (*(*[1 << 31]uint32)(unsafe.Pointer(&img.Pix[0])))[:Width*Height]
+	pixels := (*(*[1 << 31]uint64)(unsafe.Pointer(&img.Pix[0])))[:Width*Height]
 
 	if Width%CellsPerWord != 0 {
 		panic(fmt.Sprint("width=", Width))
@@ -173,20 +169,37 @@ func Render(img *xgraphics.Image, b *life.Board) {
 	for r := 0; r < Rows; r++ {
 		row := b.Cells[r]
 		for w := uint(0); w < Words; w++ {
-			for c := uint(0); c < CellsPerWord; c++ {
+
+			for c := uint(0); c < 8; c++ {
 
 				word := row[w]
-				shift := uint(life.NibbleBits * c)
-				val := (word >> shift) & life.NibbleMask
+				shift := uint(8 * c)
+				val := (word >> shift) & 0xFF
 
-				if val == 0 {
-					pixels[i] = Black
-				} else {
-					pixels[i] = White
-				}
+				pixels[i] = lut2[val]
+
 				i++
 
 			}
+		}
+	}
+}
+
+var lut2 [16 * 16]uint64
+
+func init() {
+	life.SetRand(board, 1, 0.1)
+
+	var lut [16]uint64
+	lut[1] = White
+
+	for k1 := range lut {
+		for k2 := range lut {
+			v1 := lut[k1]
+			v2 := lut[k2]
+			K := k1<<life.NibbleBits | k2
+			V := v1<<32 | v2
+			lut2[K] = V
 		}
 	}
 }
