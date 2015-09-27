@@ -8,17 +8,36 @@ type Board struct {
 	cells      []Nibbles // current cells
 	temp       []Nibbles // buffer for next-gen cells
 	empty      Nibbles   // empty cell row used at borders
+	avg        []Nibbles
 	//work, done  chan int // for multi-threading
 }
 
 // Advance the state given number of steps
 func (b *Board) Advance(steps int) {
+	b.clearAvg()
 	for i := 0; i < steps; i++ {
 		for r := range b.cells {
 			b.advanceRow(r)
+			b.averageRow(r)
 		}
 		// swap: temp becomes current cells
 		b.cells, b.temp = b.temp, b.cells
+	}
+}
+
+func (b *Board) clearAvg() {
+	for _, row := range b.avg {
+		for c := range row {
+			row[c] = 0
+		}
+	}
+}
+
+func (b *Board) averageRow(r int) {
+	row := b.cells[r]
+	dst := b.avg[r]
+	for c, w := range row {
+		dst[c] += w
 	}
 }
 
@@ -199,6 +218,7 @@ func MakeBoard(rows, cols int) *Board {
 		cols:  cols,
 		cells: makeMatrix(rows, roundCols),
 		temp:  makeMatrix(rows, roundCols),
+		avg:   makeMatrix(rows, roundCols),
 		empty: makeNibs(roundCols),
 	}
 

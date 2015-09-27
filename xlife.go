@@ -128,16 +128,18 @@ var (
 	gens  int
 )
 
+const GensPerStep = 15
+
 func updater(img *xgraphics.Image, win *xwindow.Window) {
 	if gens == 32 {
 		fps := float64(gens) / time.Since(start).Seconds()
-		fmt.Println(fps, "FPS")
+		fmt.Println(fps, "FPS", (fps*GensPerStep*float64(Rows*Cols))/1e6, "Mc/s")
 		start = time.Now()
 		gens = 0
 	}
 
 	// render here
-	board.Advance(1)
+	board.Advance(GensPerStep)
 	board.Render(img.Pix)
 
 	//hopefully using checked will block us from drawing again before x
