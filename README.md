@@ -40,7 +40,7 @@ Second, for each nibble in this partial sum, we need to add its left and right n
 |    |0000|0010|0010|0000|0000|0010|0010|0011|    |
 |    |>>>>|0000|0010|0010|0000|0000|0010|0010|0011|
 | += |----|----|----|----|----|----|----|----|----|
-|    |0000|0010|0100|0100|0010|0010|0100|0111|    |
+|    |*0000*|0010|0100|0100|0010|0010|0100|0111|    |
 
 Of course, when shifting, we need to fill in the 4 bits on the left or right side with the corresponding bits of the neighboring word. We marked those with `<<<<` for brevity.
 
