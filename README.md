@@ -8,8 +8,9 @@ That's about one clock cycle per cell.
 
 We pack 16 cell states in a single 64-bit integer, using 4 bits of storage per cell. Dead cell: `0000`, live cell: `0001`. Using 4 bits per cell gives us just enough headroom to do all computations on entire words at once. E.g.: 3x16 cells are stored in these 3 64-bit words:
 
-|0000|0001|0000|0000|0000|0001|0000|0000|
+|    |    |    |    |    |    |    |    |
 |----|----|----|----|----|----|----|----|
+|0000|0001|0000|0000|0000|0001|0000|0000|
 |0000|0001|0001|0000|0000|0001|0001|0000|
 |0000|0000|0001|0000|0000|0000|0001|0000|
 
@@ -17,13 +18,15 @@ We pack 16 cell states in a single 64-bit integer, using 4 bits of storage per c
 
 By using 4 bits per cell, we can count neighbors without unpacking. We calculate the neighbors for one entire row of cells at a time. First we, add up the row with the row on top of and the row below. E.g.: for the center row:
 
-|0000|0001|0000|0000|0000|0001|0000|0000|
+|    |    |    |    |    |    |    |    |
 |----|----|----|----|----|----|----|----|
+|0000|0001|0000|0000|0000|0001|0000|0000|
 |0000|0001|0001|0000|0000|0001|0001|0000|
 |0000|0000|0001|0000|0000|0000|0001|0000|
 `+ =`
 |0000|0010|0010|0000|0000|0010|0010|0000|
 |----|----|----|----|----|----|----|----|
+|    |    |    |    |    |    |    |    |
 
 
 
