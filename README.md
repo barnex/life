@@ -79,9 +79,9 @@ We can this find the look-up keys for 16 cells as the bitwise OR of the number o
 
 `OR =`
 
-|    |    |    |    |    |    |    |    |
-|----|----|----|----|----|----|----|----|
 |0000|1010|1100|0100|0010|1010|1100|1111|
+|----|----|----|----|----|----|----|----|
+|    |    |    |    |    |    |    |    |
 
 Now we have 16 look-up keys using just 2 arithmetic operations.
 
