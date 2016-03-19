@@ -61,10 +61,14 @@ That would be 5-bit lookup key, which is unfortunate. However, we can use a tick
 |0000|     0010|       0010|      0000|
 |0000|     0011|       0011|      0001|
 | ...|      ...|        ...|       ...|
+|0000|     1010|       1010|      0000|
+| ...|      ...|        ...|       ...|
 |0001|     0000|       1000|      0000|
 |0001|     0001|       1001|      0000|
 |0001|     0010|       1010|      0000|
 |0001|     0011|       1011|      0001|
+| ...|      ...|        ...|       ...|
+|0001|     1010|       1010|      0000|
 
 We can this find the look-up keys for 16 cells as the bitwise OR of the number of neighbors with the liveness state << 3.
 
@@ -80,6 +84,7 @@ But we're not done yet. We're not going to unpack those keys to do the look-ups 
 
 A bigger look-up table holding 8 next states per key would use 8GB, so we'll not go there.
 
+Putting this all together, we execute only a few dozen instructions to find the next state of 16 cells, less than two instructions per cell on average. The result is blazing fast, processing about 2 billion cells per second on a single intel core.
 
 ## cmd/weblife
 Command weblife shows life state in browser. E.g.:
