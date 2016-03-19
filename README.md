@@ -35,7 +35,7 @@ This requires only 2 64-bit additions.
 Second, for each nibble in this partial sum, we need to add its left and right neighbor. We do this by adding the row with itself shifted by 4 bits to the left and 4 bits to the right.
 
 |    |    |    |    |    |    |    |    |    |    |
-|    |----|----|----|----|----|----|----|----|    |
+|----|----|----|----|----|----|----|----|----|----|
 |0000|0010|0010|0000|0000|0010|0010|0011|xxxx|    |
 |    |0000|0010|0010|0000|0000|0010|0010|0011|    |
 |    |xxxx|0000|0010|0010|0000|0000|0010|0010|0011|
