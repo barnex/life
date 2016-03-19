@@ -70,7 +70,7 @@ That would be 5-bit lookup key, which is unfortunate. However, we can use a tick
 | ...|      ...|        ...|       ...|
 |0001|     1010|       1010|      0000|
 
-We can this find the look-up keys for 16 cells as the bitwise OR of the number of neighbors with the liveness state << 3.
+We can thus find the look-up keys for 16 cells as the bitwise OR of the number of neighbors with the liveness state << 3.
 
 |    |    |    |    |    |    |    |    |
 |----|----|----|----|----|----|----|----|
