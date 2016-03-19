@@ -87,7 +87,19 @@ Now we have 16 look-up keys using just 2 arithmetic operations.
 
 But we're not done yet. We're not going to unpack those keys to do the look-ups one by one! We'll do them 4 cells (16bits) at a time. Our expanded look-up table holds the next states for 4 cells at a time and uses 2^16 x 16 bit = 131kB of memory.
 
+|4 look-up keys|4 next states|
+|---|---|
+|0000 0000 0000 0000|0000 0000 0000 0000|
+|...|...|
+|0000 0000 0000 0011|0000 0000 0000 0001|
+|...|...|
+|0000 0000 0011 0000|0000 0000 0001 0000|
+|...|...|
+
+
+In this way, we find the next state for 16 cells by 4 look-ups. We use 16-bit addressing and don't require shifts.
 A bigger look-up table holding 8 next states per key would use 8GB, so we'll not go there.
+
 
 Putting this all together, we execute only a few dozen instructions to find the next state of 16 cells, less than two instructions per cell on average. The result is blazing fast, processing about 2 billion cells per second on a single intel core.
 
