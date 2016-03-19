@@ -44,11 +44,11 @@ Second, for each nibble in this partial sum, we need to add its left and right n
 
 Of course, when shifting, we need to fill in the 4 bits on the left or right side with the corresponding bits of the neighboring word. We marked those with `<<<<` for brevity.
 
-We now have the number of neighbors for 16 cells, using only a few additions and shifts. A more straightforward implementation would have taken about 100 loads, 100 additions and 100 stores. Note that we include the central cell itself in the number of neighbors.
+We now have the number of neighbors for 16 cells, using only a few additions and shifts. A more straightforward implementation might have taken about 100 1-byte loads, 100 additions and 100 stores. Note that we include the central cell itself in the number of neighbors.
 
 ## Finding the next state
 
-The liveness of a cell and its number of neighbors determine the cell's next state. 
+The liveness of a cell and its number of neighbors determine the cell's next state. We do this with a look-up table mapping the cell state and number of neighbors to the cell's next state. That would be 5-bit lookup key, which is unfortunate. However, we can use a tick here: the look-up key is the bitwise OR of the number of neighbors with the cell state << 3. This operation looses information, as the high bit of the number of neighbors gets overwritten by the cell state. Fortunately this does not matter for the final result! A cell with 8 or 9 neighbors will be dead regardless of its initial state.
 
 |cell|neighbors|lookup-code|next state|
 |----|---------|-----------|----------|
@@ -61,6 +61,7 @@ The liveness of a cell and its number of neighbors determine the cell's next sta
 |0001|     0001|       1001|      0000|
 |0001|     0010|       1010|      0000|
 |0001|     0011|       1011|      0001|
+
 
 
 
