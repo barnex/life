@@ -73,9 +73,12 @@ That would be 5-bit lookup key, which is unfortunate. However, we can use a tick
 We can this find the look-up keys for 16 cells as the bitwise OR of the number of neighbors with the liveness state << 3.
 
 |    |    |    |    |    |    |    |    |
+|----|----|----|----|----|----|----|----|
 |0000|0010|0100|0100|0010|0010|0100|0111|
 |0000|1000|1000|0000|0000|1000|1000|1000|
 `OR =`
+|    |    |    |    |    |    |    |    |
+|----|----|----|----|----|----|----|----|
 |0000|1010|1100|0100|0010|1010|1100|1111|
 
 Now we have 16 look-up keys using just 2 arithmetic operations.
