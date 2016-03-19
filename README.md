@@ -9,6 +9,7 @@ That's about one clock cycle per cell.
 We pack 16 cell states in a single 64-bit integer, using 4 bits of storage per cell. Dead cell: `0000`, live cell: `0001`. Using 4 bits per cell gives us just enough headroom to do all computations on entire words at once.
 
 |0000|0001|0000|0000|0000|0001|0000|0000|
+|----|----|----|----|----|----|----|----|
 |0000|0001|0001|0000|0000|0001|0001|0000|
 |0000|0000|0001|0000|0000|0000|0001|0000|
 
