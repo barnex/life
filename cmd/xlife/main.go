@@ -1,24 +1,21 @@
-//+build ignore
-
-//This demonstration shows drawing entire generated images to an x window
-//and calculating the speed of the generation and the drawing operations
-//It should be noted that redrawing the entire image is inefficient, this demo
-//was made to show me how fast I could draw to the windows with this method.
+/*
+Command xlife runs game of life and shows the state in an X window.
+It uses modified code from https://github.com/BurntSushi/xgbutil.
+*/
 package main
 
 import (
 	"fmt"
+	"image"
+	"log"
+	"math/rand"
+	"os"
+	"runtime/pprof"
 	"time"
 
 	"github.com/BurntSushi/xgb/xproto"
 	"github.com/BurntSushi/xgbutil"
 	"github.com/BurntSushi/xgbutil/keybind"
-	//"github.com/BurntSushi/xgbutil/xevent"
-	"image"
-	"log"
-	"os"
-	"runtime/pprof"
-
 	"github.com/BurntSushi/xgbutil/xgraphics"
 	"github.com/BurntSushi/xgbutil/xwindow"
 	"github.com/barnex/life"
@@ -27,8 +24,8 @@ import (
 const CellsPerWord = life.NibblesPerWord
 
 var (
-	Cols   = 1920 - 13
-	Rows   = 1024
+	Cols   = 1920
+	Rows   = 1080
 	Width  = life.DivUp(Cols, CellsPerWord) * CellsPerWord // image too wide to fit border
 	Height = Rows
 )
@@ -38,7 +35,33 @@ var board *life.Board
 func main() {
 
 	board = life.MakeBoard(Rows, Cols)
-	life.SetRand(board, 1, 0.2725)
+	//life.SetRand(board, 1, 0.02)
+
+	const (
+		O = false
+		I = true
+	)
+
+	glider := [][]bool{
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, I, O, O, I, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, I, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, I, O, O, O, I, O, O, O, O, O, I, O, O},
+		{O, O, O, O, O, O, O, I, I, I, I, O, O, O, O, I, O, O, O, I},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, O, O, O, O, I},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, I, I, I, I, I, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+		{O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O, O},
+	}
+
+	for i := 0; i < Rows-100; i++ {
+		for j := 0; j < Cols-100; j++ {
+			if rand.Float64() < 0.00003 {
+				life.BoardSet(board, i, j, glider)
+			}
+		}
+	}
 
 	X, err := xgbutil.NewConn()
 	if err != nil {
@@ -81,8 +104,9 @@ func main() {
 	//		}
 	//	}).Connect(X, win.Id)
 
-	//So here i'm going to try to make a image..'
 	img := xgraphics.New(X, image.Rect(0, 0, Width, Height))
+
+	time.Sleep(2 * time.Second)
 
 	err = img.XSurfaceSet(win.Id)
 	if err != nil {
@@ -92,9 +116,6 @@ func main() {
 		log.Printf("Window %d surface set to image OK\n", win)
 	}
 
-	// I /think/ XDraw actually sends data to server?
-	//img.XDraw()
-	// I /think/ XPaint tells the server to paint image to window
 	img.XPaint(win.Id)
 
 	//initPProf()
@@ -106,7 +127,6 @@ func main() {
 
 	//pprof.StopCPUProfile()
 
-	//This seems to start a main loop for listening to xevents
 	//xevent.Main(X)
 }
 
@@ -142,9 +162,6 @@ func updater(img *xgraphics.Image, win *xwindow.Window) {
 	board.Advance(GensPerStep)
 	board.Render(img.Pix)
 
-	//hopefully using checked will block us from drawing again before x
-	//draws although XDraw might block anyway, we can check for an error
-	//here
 	err := img.XDrawChecked()
 	if err != nil {
 		log.Println(err)

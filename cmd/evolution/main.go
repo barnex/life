@@ -1,11 +1,15 @@
-//+build ignore
-
+/*
+Command evolution runs game of life from random initial states with varying
+fill fractions (0-100%), and outputs how the state evolves towards equilibrium.
+Output is two-column table:
+	generation, fill fraction
+*/
 package main
 
 import (
 	"fmt"
 
-	. "."
+	. "github.com/barnex/life"
 )
 
 func main() {

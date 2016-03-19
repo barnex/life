@@ -1,6 +1,4 @@
-//+build ignore
-
-// weblife runs game of life and displays results in a browser.
+// Command weblife runs game of life and displays results in a browser.
 package main
 
 import (
@@ -11,7 +9,7 @@ import (
 	"log"
 	"net/http"
 
-	. "."
+	. "github.com/barnex/life"
 )
 
 func main() {
