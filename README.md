@@ -36,9 +36,9 @@ Second, for each nibble in this partial sum, we need to add its left and right n
 
 |    |    |    |    |    |    |    |    |    |    |
 |----|----|----|----|----|----|----|----|----|----|
-|0000|0010|0010|0000|0000|0010|0010|0011|xxxx|    |
+|0000|0010|0010|0000|0000|0010|0010|0011|<<<<|    |
 |    |0000|0010|0010|0000|0000|0010|0010|0011|    |
-|    |xxxx|0000|0010|0010|0000|0000|0010|0010|0011|
+|    |>>>>|0000|0010|0010|0000|0000|0010|0010|0011|
 
 `+ =`
 
@@ -46,7 +46,7 @@ Second, for each nibble in this partial sum, we need to add its left and right n
 |----|----|----|----|----|----|----|----|
 |    |    |    |    |    |    |    |    |
 
-Of course, when shifting, we need to fill in the 4 bits on the left or right side with the corresponding bits of the neighboring word. We marked those with `xxxx` for brevity.
+Of course, when shifting, we need to fill in the 4 bits on the left or right side with the corresponding bits of the neighboring word. We marked those with `<<<<` for brevity.
 
 We now have the number of neighbors for 16 cells, using only a few additions and shifts. A more straightforward implementation would have taken about 100 loads, 100 additions and 100 stores. Note that we include the central cell itself in the number of neighbors.
 
